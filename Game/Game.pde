@@ -1,4 +1,5 @@
 float depth = 2000;
+final float maxAngle = PI/6;
 
 
 void settings() {
@@ -50,18 +51,18 @@ void mouseDragged()
 {
   mouseZ_2 = mouseX;
   rz = rz + (mouseZ_1-mouseZ_2)*PI/speed;
-  if (rz > PI/6) {
-    rz = PI/6;
-  } else if (rz < - PI/6) {
-    rz = -PI/6;
+  if (rz > maxAngle) {
+    rz = maxAngle;
+  } else if (rz < - maxAngle) {
+    rz = -maxAngle;
   }
   mouseZ_1 = mouseZ_2;
   mouseX_2 = mouseY;
   rx = rx + (mouseX_1-mouseX_2)*PI/1000.0;
-  if (rx > PI/6) {
-    rx = PI/6;
-  } else if (rx < - PI/6) {
-    rx = -PI/6;
+  if (rx > maxAngle) {
+    rx = maxAngle;
+  } else if (rx < - maxAngle) {
+    rx = -maxAngle;
   }
   mouseX_1 = mouseX_2;
   draw();
@@ -83,6 +84,4 @@ void mouseWheel(MouseEvent event) {
   } else if (speed2 > 0)
     for (int i = 0; i < speed2; ++i)
       speed /= 1.01;
-
-  println(speed);
 }
