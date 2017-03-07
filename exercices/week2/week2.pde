@@ -1,3 +1,13 @@
+float value = 1.0;
+float angleX = 0.0;
+float angleY = 0.0;
+
+float[][] transformScale = scaleMatrix(value, value, value);
+float[][] transformX = rotateXMatrix(angleX);
+float[][] transformY = rotateYMatrix(angleY);
+
+
+
 void settings() {
   size (1000, 1000, P2D);
 }
@@ -6,15 +16,16 @@ void setup() {
 void draw() {
   background(255, 255, 255);
   My3DPoint eye = new My3DPoint(0, 0, -5000);
-  My3DPoint origin = new My3DPoint(0, 0, 0);
+  My3DPoint origin = new My3DPoint(200, 200, 0);
   My3DBox input3DBox = new My3DBox(origin, 100, 150, 300);
   
-  //rotated around x
-  float[][] transform1 = rotateXMatrix(PI/8);
-  input3DBox = transformBox(input3DBox, transform1);
+  
+  input3DBox = transformBox(input3DBox, transformScale);
+  input3DBox = transformBox(input3DBox, transformX);
+  input3DBox = transformBox(input3DBox, transformY);
   projectBox(eye, input3DBox).render();
   
-  //rotated and translated
+  /*//rotated and translated
   float[][] transform2 = translationMatrix(200, 200, 0);
   input3DBox = transformBox(input3DBox, transform2);
   projectBox(eye, input3DBox).render();
@@ -22,7 +33,53 @@ void draw() {
   //rotated, translated, and scaled
   float[][] transform3 = scaleMatrix(2, 2, 2);
   input3DBox = transformBox(input3DBox, transform3);
-  projectBox(eye, input3DBox).render();
+  projectBox(eye, input3DBox).render();*/
+}
+
+int mouseY_1 = 0;
+int mouseY_2 = 0;
+void mouseMoved(){
+  mouseY_1 = mouseY;
+}
+void mouseDragged() 
+{
+  mouseY_2 = mouseY;
+  value = value * (1 + (mouseY_1-mouseY_2)/100.0);
+  mouseY_1 = mouseY_2;
+  transformScale = scaleMatrix(value, value, value);  
+  draw();
+}
+
+
+void keyPressed()
+{
+    if (key == CODED) {
+      if (keyCode == DOWN ) {
+        angleX += PI/100; 
+        transformX = rotateXMatrix(angleX);
+      }
+      if (keyCode == UP ) {
+         angleX -= PI/100;
+         transformX = rotateXMatrix(angleX);
+      }
+    }
+    if (key == CODED) {
+      if (keyCode == RIGHT ) {
+        angleY += PI/100; 
+        transformY = rotateYMatrix(angleY);
+      }
+      if (keyCode == LEFT ) {
+         angleY -= PI/100;
+         transformY = rotateYMatrix(angleY);
+      }
+    }
+
+    
+
+    
+  
+    draw();
+  
 }
 
 class My2DPoint {
