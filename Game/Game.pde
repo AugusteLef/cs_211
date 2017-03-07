@@ -1,12 +1,12 @@
 float depth = 2000;
-final float maxAngle = PI/6;
+final float maxAngle = PI/3;
 
 
 void settings() {
   size(500, 500, P3D);
 }
 void setup() {
-  //noStroke();
+  noStroke();
 }
 void draw() {
   camera(width/2, height/2, depth, 250, 250, 0, 0, 1, 0);
@@ -15,14 +15,8 @@ void draw() {
   lights();
   background(200);
   translate(width/2, height/2, 0);
-
-  if (rx > PI/3) {
-    rx = PI/3;
-  } else if (rx < - PI/3) {
-    rx = -PI/3;
-  }
   rotateZ(rz);
-  rotateX(rx);
+  rotateX(rx + PI/2);
   box(1500, 1500, 100);
   /*for (int x = -2; x <= 2; x++) {
    for (int y = -2; y <= 2; y++) {
@@ -80,8 +74,8 @@ void mouseWheel(MouseEvent event) {
   int speed2 = (int)event.getCount();
   if (speed2 < 0) {
     for (int i = 0; i < -speed2; ++i)
-      speed *= 1.01;
+      speed *= 1.02;
   } else if (speed2 > 0)
     for (int i = 0; i < speed2; ++i)
-      speed /= 1.01;
+      speed /= 1.02;
 }
