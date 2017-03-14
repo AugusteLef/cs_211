@@ -1,8 +1,11 @@
 float depth = 3000; // Default camera depth
 final float maxAngle = PI/3;
-
+final static int SPHERE = 100;
+final static int BOX_X = 1500;
+final static int BOX_Z = 1500;
+final static int BOX_Y = 100;
 PVector gravity  = new PVector(0, 0, 0);
-PVector location = new PVector(width/2, height/2 - 200, 0);
+PVector location = new PVector(width/2, height/2 - BOX_Y - SPHERE, 0);
 PVector velocity = new PVector(0, 0, 0); 
 PVector friction = new PVector(0, 0, 0);
 float gravityConstant = 9.81;
@@ -20,7 +23,6 @@ void setup() {
   noStroke();  
 }
 void draw() {
-  println(velocity);
   // New light
   directionalLight(50,100,125,1,1,0);
   ambientLight(102,102,102);
@@ -40,7 +42,7 @@ void draw() {
   // Create the box with a color
   color c = color(0, 172, 190);
   fill(c);
-  box(1500, 100, 1500);
+  box(BOX_X, 100, BOX_Z);
   
   
   
@@ -54,14 +56,14 @@ void draw() {
   
   velocity.add(gravity);
   velocity.add(friction);
-  println(velocity);
   location.add(velocity);
+  checkEdges();
   
   c = color(255, 0, 10);
   
   fill(c);
   translate(location.x, location.y, location.z);
-  sphere(100);
+  sphere(SPHERE);
   
 }
 
@@ -141,4 +143,23 @@ void mouseWheel(MouseEvent event) {
   else if (wheelCount > 0)
     for (int i = 0; i < wheelCount; ++i)
       speed /= 1.02;
+}
+
+void checkEdges() {
+    if (location.x >= (BOX_X/2 - SPHERE)*cos(rx)) {
+      velocity.x *= -1;
+      location.x = (BOX_X/2 - SPHERE)*cos(rx);
+    }else if (location.x <= - (BOX_X/2 - SPHERE)*cos(rx)) {
+      velocity.x *= -1;
+      location.x = - (BOX_X/2 - SPHERE)*cos(rx);
+    }
+      
+    
+    if (location.z >=  (BOX_Z/2 - SPHERE)*cos(rz)) {
+       velocity.z *= -1;
+       location.z = (BOX_Z/2 - SPHERE)*cos(rz);
+    }else if (location.z <=  - (BOX_Z/2 - SPHERE)*cos(rz)) {
+      velocity.z *= -1;
+      location.z =  - (BOX_Z/2 - SPHERE)*cos(rz);
+    }
 }
