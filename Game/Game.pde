@@ -1,6 +1,17 @@
 float depth = 3000; // Default camera depth
 final float maxAngle = PI/3;
 
+PVector gravity  = new PVector(0, 0, 0);
+PVector location = new PVector(width/2, height/2 - 200, 0);
+PVector velocity = new PVector(0, 0, 0); 
+PVector friction = new PVector(0, 0, 0);
+float gravityConstant = 9.81;
+float normalForce = 1;
+float mu = 0.01;
+float frictionMagnitude = normalForce * mu;
+
+
+
 
 void settings() {
   size(1000, 1000, P3D);
@@ -9,8 +20,10 @@ void setup() {
   noStroke();  
 }
 void draw() {
+  println(velocity);
   // New light
-  pointLight(255, 255, 255, 1, 1, 0);
+  directionalLight(50,100,125,1,1,0);
+  ambientLight(102,102,102);
   
   // Position camera in the center of the screen
   camera(width/2, height/2, depth, width/2, height/2, 0, 0, 1, 0);
@@ -29,6 +42,26 @@ void draw() {
   fill(c);
   box(1500, 100, 1500);
   
+  
+  
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  
+  gravity.x = sin(rz) * gravityConstant;
+  gravity.z = - sin(rx) * gravityConstant;
+  
+  friction = velocity.get().mult(-1).normalize().mult(frictionMagnitude);
+  
+  velocity.add(gravity);
+  velocity.add(friction);
+  println(velocity);
+  location.add(velocity);
+  
+  c = color(255, 0, 10);
+  
+  fill(c);
+  translate(location.x, location.y, location.z);
+  sphere(100);
   
 }
 
@@ -84,7 +117,7 @@ void mouseDragged()
   mouseX_before = mouseX_after;
   
   // Call draw to update the view
-  draw();
+
 }
 void keyPressed() {
   // Changed depth of the camera when key pressed
