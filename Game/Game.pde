@@ -8,10 +8,13 @@ PVector gravity  = new PVector(0, 0, 0);
 PVector location = new PVector(width/2, height/2 - BOX_Y - SPHERE, 0);
 PVector velocity = new PVector(0, 0, 0); 
 PVector friction = new PVector(0, 0, 0);
-float gravityConstant = 9.81;
+float rebond = 0.7;
+float gravityConstant = 1;
 float normalForce = 1;
 float mu = 0.01;
 float frictionMagnitude = normalForce * mu;
+
+color c;
 
 
 
@@ -23,7 +26,7 @@ void setup() {
   noStroke();  
 }
 void draw() {
-  // New light
+  // New lights
   directionalLight(50,100,125,1,1,0);
   ambientLight(102,102,102);
   
@@ -40,14 +43,21 @@ void draw() {
   rotateX(rx);
   
   // Create the box with a color
-  color c = color(0, 172, 190);
+  c = color(0, 172, 190);
   fill(c);
-  box(BOX_X, 100, BOX_Z);
+  box(BOX_X, BOX_Y, BOX_Z);
+  
+  updatePos();
+  
+  // Create sphere with a color
+  c = color(255, 0, 10);
+  fill(c);
+  sphere(SPHERE);
   
   
-  
-  ///////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////
+}
+
+void updatePos() {
   
   gravity.x = sin(rz) * gravityConstant;
   gravity.z = - sin(rx) * gravityConstant;
@@ -57,16 +67,13 @@ void draw() {
   velocity.add(gravity);
   velocity.add(friction);
   location.add(velocity);
+  
   checkEdges();
   
-  c = color(255, 0, 10);
-  
-  fill(c);
   translate(location.x, location.y, location.z);
-  sphere(SPHERE);
+  
   
 }
-
 // Initalise mouse_before/after to follow mouse position and rx/rz to save angle
 int mouseZ_before = 0;
 int mouseZ_after = 0;
@@ -107,7 +114,7 @@ void mouseDragged()
   // Save new mouse position
   mouseX_after = mouseY;
   //Increase the angle by the differnce between mouse positions
-  rx = rx + (mouseX_before - mouseX_after) * PI/1000.0;
+  rx = rx + (mouseX_before - mouseX_after) * PI/speed;
   
   // If the angle is too big or to small, readjust it
   if (rx > maxAngle)
@@ -146,20 +153,26 @@ void mouseWheel(MouseEvent event) {
 }
 
 void checkEdges() {
-    if (location.x >= (BOX_X/2 - SPHERE)*cos(rx)) {
-      velocity.x *= -1;
-      location.x = (BOX_X/2 - SPHERE)*cos(rx);
-    }else if (location.x <= - (BOX_X/2 - SPHERE)*cos(rx)) {
-      velocity.x *= -1;
-      location.x = - (BOX_X/2 - SPHERE)*cos(rx);
+  
+    float limitX = (BOX_X/2 - SPHERE)*cos(rx);
+    
+    if (location.x >= limitX) {
+      velocity.x *= -rebond;
+      location.x = limitX;
+    }
+    else if (location.x <= - limitX) {
+      velocity.x *= -rebond;
+      location.x = - limitX;
     }
       
+    float limitZ = (BOX_Z/2 - SPHERE)*cos(rz);
     
-    if (location.z >=  (BOX_Z/2 - SPHERE)*cos(rz)) {
-       velocity.z *= -1;
-       location.z = (BOX_Z/2 - SPHERE)*cos(rz);
-    }else if (location.z <=  - (BOX_Z/2 - SPHERE)*cos(rz)) {
-      velocity.z *= -1;
-      location.z =  - (BOX_Z/2 - SPHERE)*cos(rz);
+    if (location.z >= limitZ) {
+       velocity.z *= -rebond;
+       location.z = limitZ;
+    }
+    else if (location.z <= - limitZ) {
+      velocity.z *= -rebond;
+      location.z = - limitZ;
     }
 }
