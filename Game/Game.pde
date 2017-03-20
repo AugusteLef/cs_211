@@ -154,25 +154,34 @@ void mouseWheel(MouseEvent event) {
 
 void checkEdges() {
   
-    float limitX = (BOX_X/2 - SPHERE)*cos(rx);
-    
-    if (location.x >= limitX) {
+    float limitX = (BOX_X/2 - SPHERE);
+    float limitZ = (BOX_Z/2 - SPHERE);
+    PVector posRotX = new PVector(location.x, location.y * cos(-rx) - location.z * sin(-rx), -location.x*sin(-rx) + location.z * cos(-rx));
+    PVector posRot = new PVector(posRotX.x*cos(-rz) - posRotX.y*sin(-rz), posRotX.x * sin(-rz)+ posRotX.y * cos(-rz), posRotX.z);
+    //PVector limitRotX = new PVector(limitX, - limitZ * sin(-rx), -limitX*sin(-rx) + limitZ * cos(-rx));
+    //PVector limitRot = new PVector(limitRotX.x*cos(-rz) - limitRotX.y*sin(-rz), limitRotX.x * sin(-rz)+ limitRotX.y * cos(-rz), limitRotX.z);
+    if (posRot.x >= limitX) {
+      location.sub(velocity);
       velocity.x *= -rebond;
-      location.x = limitX;
-    }
-    else if (location.x <= - limitX) {
-      velocity.x *= -rebond;
-      location.x = - limitX;
-    }
       
-    float limitZ = (BOX_Z/2 - SPHERE)*cos(rz);
+      
+    }
+    else if (posRot.x <= - limitX) {
+      location.sub(velocity);
+      velocity.x *= -rebond;
+      
+    }
     
-    if (location.z >= limitZ) {
+    if (posRot.z >= limitZ) {
+      location.sub(velocity);
        velocity.z *= -rebond;
-       location.z = limitZ;
+       
     }
-    else if (location.z <= - limitZ) {
+    else if (posRot.z <= - limitZ) {
+      location.sub(velocity);
       velocity.z *= -rebond;
-      location.z = - limitZ;
+      
     }
+    
+    
 }
