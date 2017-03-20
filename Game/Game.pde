@@ -8,7 +8,7 @@ PVector gravity  = new PVector(0, 0, 0);
 PVector location = new PVector(width/2, height/2 - BOX_Y - SPHERE, 0);
 PVector velocity = new PVector(0, 0, 0); 
 PVector friction = new PVector(0, 0, 0);
-float rebond = 0.7;
+float rebond = 1;
 float gravityConstant = 1;
 float normalForce = 1;
 float mu = 0.01;
@@ -48,13 +48,10 @@ void draw() {
   box(BOX_X, BOX_Y, BOX_Z);
   
   updatePos();
-  
   // Create sphere with a color
   c = color(255, 0, 10);
   fill(c);
-  sphere(SPHERE);
-  
-  
+  sphere(SPHERE);  
 }
 
 void updatePos() {
@@ -156,29 +153,25 @@ void checkEdges() {
   
     float limitX = (BOX_X/2 - SPHERE);
     float limitZ = (BOX_Z/2 - SPHERE);
-    PVector posRotX = new PVector(location.x, location.y * cos(-rx) - location.z * sin(-rx), -location.x*sin(-rx) + location.z * cos(-rx));
-    PVector posRot = new PVector(posRotX.x*cos(-rz) - posRotX.y*sin(-rz), posRotX.x * sin(-rz)+ posRotX.y * cos(-rz), posRotX.z);
-    //PVector limitRotX = new PVector(limitX, - limitZ * sin(-rx), -limitX*sin(-rx) + limitZ * cos(-rx));
-    //PVector limitRot = new PVector(limitRotX.x*cos(-rz) - limitRotX.y*sin(-rz), limitRotX.x * sin(-rz)+ limitRotX.y * cos(-rz), limitRotX.z);
-    if (posRot.x >= limitX) {
-      location.sub(velocity);
+    if (location.x >= limitX) {
+      location.x = limitX;
       velocity.x *= -rebond;
       
       
     }
-    else if (posRot.x <= - limitX) {
-      location.sub(velocity);
+    else if (location.x <= - limitX) {
+      location.x = - limitX;
       velocity.x *= -rebond;
       
     }
     
-    if (posRot.z >= limitZ) {
-      location.sub(velocity);
+    if (location.z >= limitZ) {
+       location.z = limitZ;
        velocity.z *= -rebond;
        
     }
-    else if (posRot.z <= - limitZ) {
-      location.sub(velocity);
+    else if (location.z <= - limitZ) {
+      location.z = - limitZ;
       velocity.z *= -rebond;
       
     }
