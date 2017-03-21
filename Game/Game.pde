@@ -232,6 +232,7 @@ void mouseWheel(MouseEvent event) {
 
 void checkEdges() {
 
+  //Check for the Box boundings
   float limitX = (BOX_X/2 - SPHERE);
   float limitZ = (BOX_Z/2 - SPHERE);
   if (location.x >= limitX) {
@@ -241,7 +242,6 @@ void checkEdges() {
     location.x = - limitX;
     velocity.x *= -rebond;
   }
-
   if (location.z >= limitZ) {
     location.z = limitZ;
     velocity.z *= -rebond;
@@ -249,6 +249,8 @@ void checkEdges() {
     location.z = - limitZ;
     velocity.z *= -rebond;
   }
+  
+  //TODO
 }
 
 void mouseClicked() {
@@ -259,7 +261,8 @@ void mouseClicked() {
     y = (int)((y-height/2) * depth/BOARD_SIZE);
 
     if (x + cylinderBaseSize < BOX_X/2 && x - cylinderBaseSize > -BOX_X/2 &&
-      y + cylinderBaseSize < BOX_Z/2 && y - cylinderBaseSize > -BOX_Z/2) {
+      y + cylinderBaseSize < BOX_Z/2 && y - cylinderBaseSize > -BOX_Z/2 &&
+      Math.pow(location.x - x,2) + Math.pow(location.z - y, 2) >= Math.pow(SPHERE + cylinderBaseSize, 2)) {
 
       cylinders.add(new PVector(x, 0, y));
     }
