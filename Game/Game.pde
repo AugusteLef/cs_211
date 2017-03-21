@@ -250,7 +250,25 @@ void checkEdges() {
     velocity.z *= -rebond;
   }
   
-  //TODO
+  for(PVector pos : cylinders){
+    if(Math.pow(location.x - pos.x,2) + Math.pow(location.z - pos.z, 2) < Math.pow(SPHERE + cylinderBaseSize, 2) + 1){
+      PVector normal2 = new PVector(location.x - pos.x, location.z - pos.z);
+      PVector velocity2D = new PVector(velocity.x, velocity.z);
+      float angle = 2*PVector.angleBetween(velocity2D,normal2);
+      if((velocity2D.x == 0 && normal2.x < 0)||(velocity2D.x/velocity2D.y)>(normal2.x/normal2.y))
+        angle *= -1;
+      velocity2D.rotate(angle).setMag(velocity.mag());
+      println("v1 "+velocity);
+      velocity = new PVector(velocity2D.x*rebond, 0, velocity2D.y*rebond);
+      println("v2 "+velocity);
+      
+      
+      
+      PVector normal = new PVector(location.x - pos.x, 0, location.z - pos.z);
+      float coefXY = (float)(Math.pow(cylinderBaseSize + SPHERE, 2)/(normal.z*normal.z+(normal.x*normal.x)));
+      location = new PVector(Math.signum(normal.x)*(float)Math.sqrt(normal.x*normal.x*coefXY) + pos.x, location.y , Math.signum(normal.z)*(float)Math.sqrt(normal.z*normal.z*coefXY) + pos.z);
+    }
+  }
 }
 
 void mouseClicked() {
