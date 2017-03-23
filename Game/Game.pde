@@ -254,7 +254,7 @@ void checkEdges() {
   }
 
   for (PVector pos : cylinders) {
-    if (Math.pow(location.x - pos.x, 2) + Math.pow(location.z - pos.z, 2) < Math.pow(SPHERE + CYLINDER_RADIUS, 2) + 1) {
+    if (Math.pow(location.x - pos.x, 2) + Math.pow(location.z - pos.z, 2) < Math.pow(SPHERE + CYLINDER_RADIUS, 2)) {
       PVector normal2 = new PVector(location.x - pos.x, location.z - pos.z);
       PVector velocity2D = new PVector(velocity.x, velocity.z);
       float angle = 2*PVector.angleBetween(velocity2D, normal2);
@@ -270,14 +270,60 @@ void checkEdges() {
       location = new PVector(Math.signum(normal.x)*(float)Math.sqrt(normal.x*normal.x*coefXY) + pos.x, location.y, Math.signum(normal.z)*(float)Math.sqrt(normal.z*normal.z*coefXY) + pos.z);
     }
   }
+  
+  /* Bouncing with squares, to be tested!*/
+  int edge = 2;
+  for(PVector pos : squares){
+    PVector topLeft = new PVector(pos.x - edge/2, pos.z - edge/2);
+    PVector topRight = new PVector(pos.x + edge/2, pos.z - edge/2);
+    PVector botLeft = new PVector(pos.x - edge/2, pos.z + edge/2);
+    PVector botRight = new PVector(pos.x -+ edge/2, pos.z + edge/2);
+    if(location.x + SPHERE >= pos.x - edge/2 && location.x - SPHERE <= pos.x + edge/2 && location.y <= pos.y + edge/2 && location.y >= pos.y - edge/2){
+      if(location.x < pos.x)
+        location.x = pos.x - edge/2 - SPHERE;
+      else
+        location.x = pos.x + edge/2 + SPHERE;
+      velocity.x *= -rebond;
+    }else if(location.y + SPHERE >= pos.y - edge/2 && location.y - SPHERE <= pos.y + edge/2 && location.x <= pos.x + edge/2 && location.x >= pos.x - edge/2){
+      if(location.y < pos.y)
+        location.y = pos.y - edge/2 - SPHERE;
+      else
+        location.y = pos.y + edge/2 + SPHERE;
+        velocity.y *= -rebond;
+    }else if(Math.pow(location.x - topLeft.x, 2) + Math.pow(location.y - topLeft.y, 2) <= SPHERE*SPHERE){
+      squareCorner(topLeft);
+    }else if(Math.pow(location.x - topRight.x, 2) + Math.pow(location.y - topRight.y, 2) <= SPHERE*SPHERE){
+      squareCorner(topRight);
+    }else if(Math.pow(location.x - botLeft.x, 2) + Math.pow(location.y - botLeft.y, 2) <= SPHERE*SPHERE){
+      squareCorner(botLeft);
+    }else if(Math.pow(location.x - botRight.x, 2) + Math.pow(location.y - botRight.y, 2) <= SPHERE*SPHERE){
+      squareCorner(botRight);
+    }
+  }
+  
+  
+}
+//Inner method for bouncing with squares in the corners
+void squareCorner(PVector cornerPos){
+  PVector normal2 = new PVector(location.x - cornerPos.x, location.z - cornerPos.z);
+  PVector velocity2D = new PVector(velocity.x, velocity.z);
+  float angle = 2*PVector.angleBetween(velocity2D, normal2);
+  if ((velocity2D.x == 0 && normal2.x < 0)||(velocity2D.x/velocity2D.y)>(normal2.x/normal2.y))
+     angle *= -1;
+  velocity2D.rotate(angle).setMag(velocity.mag());
+  velocity = new PVector(- velocity2D.x*rebond, 0, - velocity2D.y*rebond);
+  
+  PVector normal = new PVector(location.x - cornerPos.x, 0, location.z - cornerPos.z);
+  float coefXY = (float)(Math.pow(SPHERE, 2)/(normal.z*normal.z+(normal.x*normal.x)));
+  location = new PVector(Math.signum(normal.x)*(float)Math.sqrt(normal.x*normal.x*coefXY) + cornerPos.x, location.y, Math.signum(normal.z)*(float)Math.sqrt(normal.z*normal.z*coefXY) + cornerPos.z);
 }
 
 void mouseClicked() {
   if (paused) {
     int x = mouseX;
     int y = mouseY;
-    x = (int)((x-width/2) * (depth-BOX_Y/2)/BOARD_SIZE*1.15);
-    y = (int)((y-height/2) * (depth-BOX_Y/2)/BOARD_SIZE*1.15);
+    x = (int)((x-width/2) * (depth-BOX_Y/2)/width*1.15);
+    y = (int)((y-height/2) * (depth-BOX_Y/2)/height*1.15);
 
     if (x + CYLINDER_RADIUS < BOX_X/2 && x - CYLINDER_RADIUS > -BOX_X/2 &&
       y + CYLINDER_RADIUS < BOX_Z/2 && y - CYLINDER_RADIUS > -BOX_Z/2 &&
