@@ -178,6 +178,7 @@ void mouseClicked() {
     int y = mouseY;
     x = (int)((x * (depth-BOX_Y/2)/width*1.15)-CUBE_EDGE/4)/CUBE_EDGE*CUBE_EDGE + CUBE_EDGE/2 - (int)(width/2 * (depth-BOX_Y/2)/width*1.15)/CUBE_EDGE*CUBE_EDGE;
     y = (int)((y * (depth-BOX_Y/2)/height*1.15)-CUBE_EDGE/4)/CUBE_EDGE*CUBE_EDGE + CUBE_EDGE/2 - (int)(height/2 * (depth-BOX_Y/2)/height*1.15)/CUBE_EDGE*CUBE_EDGE;
-    shapes.squares.add(new PVector(x, -BOX_Y/2, y));
+    if(!shapes.squares.contains(new PVector(x, -BOX_Y/2, y)) && x < BOX_X/2 && y < BOX_Z/2 && x > -BOX_X/2 && y > -BOX_Z/2)
+      shapes.squares.add(new PVector(x, -BOX_Y/2, y));
   }
 }

@@ -93,13 +93,13 @@ class Mover {
         else
           location.z = pos.z + CUBE_EDGE/2 + SPHERE;
         velocity.z *= -rebond;
-      } else if (Math.pow(location.x - topLeft.x, 2) + Math.pow(location.z - topLeft.y, 2) <= SPHERE*SPHERE) {
+      } else if (Math.pow(location.x - topLeft.x, 2) + Math.pow(location.z - topLeft.y, 2) <= SPHERE*SPHERE -1) {
         squareCorner(topLeft);
-      } else if (Math.pow(location.x - topRight.x, 2) + Math.pow(location.z - topRight.y, 2) <= SPHERE*SPHERE) {
+      } else if (Math.pow(location.x - topRight.x, 2) + Math.pow(location.z - topRight.y, 2) <= SPHERE*SPHERE -1) {
         squareCorner(topRight);
-      } else if (Math.pow(location.x - botLeft.x, 2) + Math.pow(location.z - botLeft.y, 2) <= SPHERE*SPHERE) {
+      } else if (Math.pow(location.x - botLeft.x, 2) + Math.pow(location.z - botLeft.y, 2) <= SPHERE*SPHERE -1) {
         squareCorner(botLeft);
-      } else if (Math.pow(location.x - botRight.x, 2) + Math.pow(location.z - botRight.y, 2) <= SPHERE*SPHERE) {
+      } else if (Math.pow(location.x - botRight.x, 2) + Math.pow(location.z - botRight.y, 2) <= SPHERE*SPHERE -1) {
         squareCorner(botRight);
       }
     }
