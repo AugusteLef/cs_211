@@ -1,5 +1,6 @@
 Mover mover;
 Shapes shapes;
+Surfaces surfaces;
 
 final static float CYLINDER_RADIUS = 100;
 final static float CYLINDER_HEIGHT = -250;
@@ -26,20 +27,18 @@ int mouseZ_after = 0;
 int mouseX_before = 0;
 int mouseX_after = 0;
 
-//Speed game moves (box and items)
+// Speed game moves (box and items)
 float speed = 1000;
-
-
-
-
 
 void settings() {
   size(BOARD_SIZE, BOARD_SIZE, P3D);
 }
 void setup() {
-  // Initalize Mover and Shapes
+  // Initalize Mover, Shapes ans Surfaces
   mover = new Mover();
   shapes = new Shapes();
+  surfaces = new Surfaces();
+
   noStroke();
 }
 void draw() {
@@ -51,7 +50,7 @@ void draw() {
   camera(width/2, height/2, depth, width/2, height/2, 0, 0, 1, 0);
   // White background
   background(255);
-
+  pushMatrix();
   // Set correct position for the box
   translate(width/2, height/2, 0); // Place it in the center of the screen
   if (paused) { // If paused, fixed rotation
@@ -60,20 +59,32 @@ void draw() {
     rotateZ(rz);
     rotateX(rx);
   }
-  
+
   // Draw the board
   color c = color(0, 172, 190);
   fill(c);
   box(BOX_X, BOX_Y, BOX_Z);
-  
+
   // Draw the shapes
   shapes.drawShapes();
   if (!paused) { // If game running, update ball position
     mover.update();
   }
-  
+
   // Display the ball
   mover.display();
+  
+  ///////////////////////////////////////////////////////////////////////////////////////
+  
+  // Back to normal view
+  popMatrix();
+  camera();
+  noLights();
+  // Create every surface
+  surfaces.drawBackgroundSurface();
+
+  // Print every surface
+  image(surfaces.backgroundSurface, 0, 3 * BOARD_SIZE / 4);
 }
 
 void mouseMoved() {
@@ -178,7 +189,7 @@ void mouseClicked() {
     int y = mouseY;
     x = (int)((x * (depth-BOX_Y/2)/width*1.15)-CUBE_EDGE/4)/CUBE_EDGE*CUBE_EDGE + CUBE_EDGE/2 - (int)(width/2 * (depth-BOX_Y/2)/width*1.15)/CUBE_EDGE*CUBE_EDGE;
     y = (int)((y * (depth-BOX_Y/2)/height*1.15)-CUBE_EDGE/4)/CUBE_EDGE*CUBE_EDGE + CUBE_EDGE/2 - (int)(height/2 * (depth-BOX_Y/2)/height*1.15)/CUBE_EDGE*CUBE_EDGE;
-    if(!shapes.squares.contains(new PVector(x, -BOX_Y/2, y)) && x < BOX_X/2 && y < BOX_Z/2 && x > -BOX_X/2 && y > -BOX_Z/2)
+    if (!shapes.squares.contains(new PVector(x, -BOX_Y/2, y)) && x < BOX_X/2 && y < BOX_Z/2 && x > -BOX_X/2 && y > -BOX_Z/2)
       shapes.squares.add(new PVector(x, -BOX_Y/2, y));
   }
 }
