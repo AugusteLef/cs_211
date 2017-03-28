@@ -42,6 +42,21 @@ void setup() {
   noStroke();
 }
 void draw() {
+  drawGame();
+  drawSurfaces();
+}
+void drawSurfaces() {
+  camera();
+  noLights();
+  // Create every surface
+  surfaces.drawAllSurfaces();
+
+  // Print every surface
+  surfaces.showAllSurfaces();
+}
+
+
+void drawGame() {
   // New lights
   directionalLight(50, 100, 125, 1, 1, 0);
   ambientLight(102, 102, 102);
@@ -73,20 +88,12 @@ void draw() {
 
   // Display the ball
   mover.display();
-  
+
   ///////////////////////////////////////////////////////////////////////////////////////
-  
+
   // Back to normal view
   popMatrix();
-  camera();
-  noLights();
-  // Create every surface
-  surfaces.drawBackgroundSurface();
-
-  // Print every surface
-  image(surfaces.backgroundSurface, 0, 3 * BOARD_SIZE / 4);
 }
-
 void mouseMoved() {
   // Keep track of current mouse position
   mouseZ_before = mouseX;

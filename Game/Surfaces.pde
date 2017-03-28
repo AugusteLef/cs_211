@@ -8,4 +8,10 @@ class Surfaces {
     backgroundSurface.background(128, 222, 234);
     backgroundSurface.endDraw();
   }
+  void drawAllSurfaces() {
+    drawBackgroundSurface();
+  }
+  void showAllSurfaces() {
+    image(backgroundSurface, 0, 3 * BOARD_SIZE / 4); 
+  }
 }
