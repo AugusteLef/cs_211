@@ -9,10 +9,11 @@ class Shapes {
   PShape openCube = new PShape();
   PShape topCube = new PShape();
 
-  Shapes() {
-    
-    // Create shapes
-    
+  Shapes() {  
+    createCylinders();
+    createCubes();
+  }
+  void createCylinders() {
     float angle;
     float[] x = new float[cylinderResolution + 1];
     float[] y = new float[cylinderResolution + 1];
@@ -39,8 +40,10 @@ class Shapes {
       coverTop.vertex(x[i + 1], CYLINDER_HEIGHT, y[i+1]);
     }
     coverTop.endShape();
-
-    //For the cube : cylinders of resolution 4
+  }
+  
+  void createCubes() {
+     //For the cube : cylinders of resolution 4
     float[] x1 = new float[5];
     float[] y1 = new float[5];
     //get the x and y position on a square
@@ -73,7 +76,6 @@ class Shapes {
     }
     topCube.endShape();
   }
-  
   void drawShapes() {
     for (PVector p : cylinders) {
       translate(p.x, p.y, p.z);

@@ -2,6 +2,7 @@ Mover mover;
 Shapes shapes;
 Surfaces surfaces;
 
+
 final static float CYLINDER_RADIUS = 100;
 final static float CYLINDER_HEIGHT = -250;
 final static float MAX_ANGLE = PI/3;
@@ -34,7 +35,6 @@ void settings() {
   size(BOARD_SIZE, BOARD_SIZE, P3D);
 }
 void setup() {
-  // Initalize Mover, Shapes ans Surfaces
   mover = new Mover();
   shapes = new Shapes();
   surfaces = new Surfaces();
@@ -50,13 +50,14 @@ void drawSurfaces() {
   noLights();
   // Create every surface
   surfaces.drawAllSurfaces();
-
   // Print every surface
   surfaces.showAllSurfaces();
 }
 
 
 void drawGame() {
+  pushMatrix();
+  
   // New lights
   directionalLight(50, 100, 125, 1, 1, 0);
   ambientLight(102, 102, 102);
@@ -65,12 +66,14 @@ void drawGame() {
   camera(width/2, height/2, depth, width/2, height/2, 0, 0, 1, 0);
   // White background
   background(255);
-  pushMatrix();
+  
   // Set correct position for the box
-  translate(width/2, height/2, 0); // Place it in the center of the screen
-  if (paused) { // If paused, fixed rotation
+  translate(width/2, height/2, 0);
+  
+  if (paused) {
     rotateX(-PI/2);
-  } else { // Rotate with rx and rz
+  } 
+  else {
     rotateZ(rz);
     rotateX(rx);
   }
@@ -82,16 +85,12 @@ void drawGame() {
 
   // Draw the shapes
   shapes.drawShapes();
-  if (!paused) { // If game running, update ball position
-    mover.update();
-  }
+  
+  if (!paused) {mover.update();}
 
   // Display the ball
   mover.display();
 
-  ///////////////////////////////////////////////////////////////////////////////////////
-
-  // Back to normal view
   popMatrix();
 }
 void mouseMoved() {
