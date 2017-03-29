@@ -13,6 +13,11 @@ final static int BOX_Z = 1500;
 final static int BOX_Y = 100;
 final static int NB_OF_SQUARES = 10;
 final static int CUBE_EDGE = BOX_X/NB_OF_SQUARES;
+//Top View constants
+final static int TOP_VIEW_SIZE = 150;
+final static float TOP_VIEW_CYLINDER_RADIUS = (CYLINDER_RADIUS/BOX_X)*TOP_VIEW_SIZE;
+final static float TOP_VIEW_SPHERE = ((float)SPHERE/BOX_X)*TOP_VIEW_SIZE;
+final static float TOP_VIEW_CUBE_EDGE = ((float) CUBE_EDGE/BOX_X)*TOP_VIEW_SIZE;
 
 float depth = 3000; // Default camera depth
 
