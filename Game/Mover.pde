@@ -27,7 +27,7 @@ class Mover {
     velocity.add(gravity);
     velocity.add(friction);
     location.add(velocity);
-    
+
     checkEdges();
   }
 
@@ -45,20 +45,30 @@ class Mover {
     if (location.x >= limitX) {
       location.x = limitX;
       velocity.x *= -rebond;
+      last_score = -velocity.mag();
+      tot_score += last_score;
     } else if (location.x <= - limitX) {
       location.x = - limitX;
       velocity.x *= -rebond;
+      last_score = -velocity.mag();
+      tot_score += last_score;
     }
     if (location.z >= limitZ) {
       location.z = limitZ;
       velocity.z *= -rebond;
+      last_score = -velocity.mag();
+      tot_score += last_score;
     } else if (location.z <= - limitZ) {
       location.z = - limitZ;
       velocity.z *= -rebond;
+      last_score = -velocity.mag();
+      tot_score += last_score;
     }
 
     for (PVector pos : shapes.cylinders) {
       if (Math.pow(location.x - pos.x, 2) + Math.pow(location.z - pos.z, 2) < Math.pow(SPHERE + CYLINDER_RADIUS, 2)) {
+        last_score = velocity.mag();
+        tot_score += last_score;
         PVector normal2 = new PVector(location.x - pos.x, location.z - pos.z);
         PVector velocity2D = new PVector(velocity.x, velocity.z);
         float angle = 2*PVector.angleBetween(velocity2D, normal2);
@@ -107,6 +117,8 @@ class Mover {
 
   //Inner method for bouncing with squares in the corners
   void squareCorner(PVector cornerPos) {
+    last_score = velocity.mag();
+    tot_score += last_score;
     PVector normal2 = new PVector(location.x - cornerPos.x, location.z - cornerPos.y);
     PVector velocity2D = new PVector(velocity.x, velocity.z);
     float angle = 2*PVector.angleBetween(velocity2D, normal2);

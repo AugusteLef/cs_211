@@ -1,7 +1,7 @@
 Mover mover;
 Shapes shapes;
 Surfaces surfaces;
-
+HScrollbar scroll_bar;
 
 final static float CYLINDER_RADIUS = 100;
 final static float CYLINDER_HEIGHT = -250;
@@ -36,6 +36,10 @@ int mouseX_after = 0;
 // Speed game moves (box and items)
 float speed = 1000;
 
+float tot_score = 0;
+float last_score = 0;
+long game_tick = 0;
+
 void settings() {
   size(BOARD_SIZE, BOARD_SIZE, P3D);
 }
@@ -43,12 +47,18 @@ void setup() {
   mover = new Mover();
   shapes = new Shapes();
   surfaces = new Surfaces();
+  scroll_bar = new HScrollbar(BOARD_SIZE / 3, (4 * BOARD_SIZE / 5) + TOP_VIEW_SIZE + 30, 2*BOARD_SIZE / 3 - 25, 15);
 
   noStroke();
 }
 void draw() {
   drawGame();
+  
+  
   drawSurfaces();
+  scroll_bar.update();
+  scroll_bar.display();
+  
 }
 void drawSurfaces() {
   camera();
@@ -91,7 +101,7 @@ void drawGame() {
   // Draw the shapes
   shapes.drawShapes();
   
-  if (!paused) {mover.update();}
+  if (!paused) {mover.update();++game_tick;}
 
   // Display the ball
   mover.display();
