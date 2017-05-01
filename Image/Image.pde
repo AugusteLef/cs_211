@@ -23,7 +23,12 @@ void draw() {
 
   //PImage img2 = thresholdHSB(img, (int)(thresholdBarHueMin.getPos()*255), (int)(thresholdBarHueMax.getPos()*255), 0, 255, 0, 255);
   //PImage img2 = thresholdHSB(img, 100, 200, 100, 255, 45, 100);
-  PImage img2 = convolute(img);
+  float[][] vKernel = {
+    { 3, 0, -3 }, 
+    { 10, 0, -10 }, 
+    { 3, 0, -3 } };
+  PImage img2 = convolute(img, vKernel);
+
   image(img2, img.width, 0);
 }
 
@@ -63,11 +68,8 @@ boolean imagesEqual(PImage img1, PImage img2) {
   return true;
 }
 
-PImage convolute(PImage img) {
-  float[][] kernel = { 
-    { 9, 12, 9 }, 
-    { 12, 15, 12 }, 
-    { 9, 12, 9 }};
+PImage convolute(PImage img, float[][] kernel) {
+
 
   float normFactor = 1.f;
   int N = 3;
@@ -89,7 +91,9 @@ PImage convolute(PImage img) {
   for (int x = 0; x < w; ++x) {
     for (int y = 0; y < h; ++y) {
 
-      double sumPixels = 0;
+      double sumPixelsRed = 0;
+      double sumPixelsGreen = 0;
+      double sumPixelsBlue = 0;
       double sumCoeff = 0;
 
       for (int i = 0; i < N; ++i) {
@@ -103,11 +107,58 @@ PImage convolute(PImage img) {
           if (yImg < 0) yImg = 0;
           else if (yImg >= h) yImg = h-1;
           sumCoeff += kernelVal;
-          sumPixels = kernelVal * img.pixels[xImg + yImg*w];
+          sumPixelsRed = kernelVal * red(img.pixels[xImg + yImg*w]);
+          sumPixelsGreen = kernelVal * green(img.pixels[xImg + yImg*w]);
+          sumPixelsBlue = kernelVal * blue(img.pixels[xImg + yImg*w]);
         }
-      }
-      result.pixels[x + y*w] = color((int)(sumPixels/sumCoeff));
-      
+      } 
+      result.pixels[x + y*w] = color((int)(sumPixelsRed/sumCoeff), (int)(sumPixelsGreen/sumCoeff), (int)(sumPixelsBlue/sumCoeff));
+    }
+  }
+  result.updatePixels();
+  return result;
+}
+
+PImage scharr(PImage img) {
+  float[][] vKernel = {
+    { 3, 0, -3 }, 
+    { 10, 0, -10 }, 
+    { 3, 0, -3 } };
+  float[][] hKernel = {
+    { 3, 10, 3 }, 
+    { 0, 0, 0 }, 
+    { -3, -10, -3 } };
+  PImage result = createImage(img.width, img.height, ALPHA);
+  // clear the image
+  for (int i = 0; i < img.width * img.height; i++) {
+    result.pixels[i] = color(0);
+  }
+  float max=0;
+  float[] buffer = new float[img.width * img.height];
+
+  // *************************************
+  // Implement here the double convolution
+  // *************************************
+  PImage sum_h = convolute(img, hKernel);
+  PImage sum_v = convolute(img, vKernel);
+  sum_h.loadPixels();
+  sum_v.loadPixels();
+  int[] sum_h_pix = sum_h.pixels;
+  int[] sum_v_pix = sum_v.pixels;
+  int h = img.height;
+  int w = img.width;
+  for (int i = 0; i < h; ++i) {
+    for (int j = 0; j < w; ++j) {
+      buffer[i * w + j] = sqrt(pow(sum_h_pix[i * w + j], 2) + pow(sum_v_pix[i * w + j], 2));
+      if (buffer[i * w + j] > max) max = buffer[i * w + j];
+    }
+  }
+
+
+  for (int y = 2; y < h - 2; y++) { // Skip top and bottom edges
+    for (int x = 2; x < w - 2; x++) { // Skip left and right
+      int val=(int) ((buffer[y * w + x] / max)*255);
+      result.pixels[y * w + x]=color(val);
     }
   }
   return result;
