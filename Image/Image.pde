@@ -23,10 +23,10 @@ void draw() {
 
   //PImage img2 = thresholdHSB(img, (int)(thresholdBarHueMin.getPos()*255), (int)(thresholdBarHueMax.getPos()*255), 0, 255, 0, 255);
   //PImage img2 = thresholdHSB(img, 100, 200, 100, 255, 45, 100);
-  float[][] vKernel = {
-    { 3, 0, -3 }, 
-    { 10, 0, -10 }, 
-    { 3, 0, -3 } };
+    float[][] vKernel = {
+    { 9, 12, 9 }, 
+    { 12, 15, 12 }, 
+    { 9, 12, 9 } };
   PImage img2 = convolute(img, vKernel);
 
   image(img2, img.width, 0);
@@ -72,7 +72,7 @@ PImage convolute(PImage img, float[][] kernel) {
 
 
   float normFactor = 1.f;
-  int N = 3;
+  int N = kernel.length;//kernel must be a square, odd is the best
   // create a greyscale image (type: ALPHA) for output
   PImage result = createImage(img.width, img.height, ALPHA);
 
@@ -80,8 +80,14 @@ PImage convolute(PImage img, float[][] kernel) {
   int h = img.height;
   img.loadPixels();
   result.loadPixels();
-  // kernel size N = 3
-  //
+  
+  double sumCoeff = 0;
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < N; ++j) {
+      sumCoeff += kernel[i][j];
+    }
+  }
+
   // for each (x,y) pixel in the image:
   // - multiply intensities for pixels in the range
   // (x - N/2, y - N/2) to (x + N/2, y + N/2) by the
@@ -90,12 +96,13 @@ PImage convolute(PImage img, float[][] kernel) {
   // - set result.pixels[y * img.width + x] to this value
   for (int x = 0; x < w; ++x) {
     for (int y = 0; y < h; ++y) {
-
-      double sumPixelsRed = 0;
+      
+      //For color blur, use these 3 valo
+      /*double sumPixelsRed = 0;
       double sumPixelsGreen = 0;
-      double sumPixelsBlue = 0;
-      double sumCoeff = 0;
-
+      double sumPixelsBlue = 0;*/
+      double sumBrightness = 0;
+      
       for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
           float kernelVal = kernel[i][j];
@@ -106,13 +113,15 @@ PImage convolute(PImage img, float[][] kernel) {
           else if (xImg >= w) xImg = w-1;
           if (yImg < 0) yImg = 0;
           else if (yImg >= h) yImg = h-1;
-          sumCoeff += kernelVal;
-          sumPixelsRed = kernelVal * red(img.pixels[xImg + yImg*w]);
-          sumPixelsGreen = kernelVal * green(img.pixels[xImg + yImg*w]);
-          sumPixelsBlue = kernelVal * blue(img.pixels[xImg + yImg*w]);
+
+          sumBrightness += kernelVal * brightness(img.pixels[xImg + yImg*w]);
+          /*sumPixelsRed += kernelVal * red(img.pixels[xImg + yImg*w]);
+          sumPixelsGreen += kernelVal * green(img.pixels[xImg + yImg*w]);
+          sumPixelsBlue += kernelVal * blue(img.pixels[xImg + yImg*w]);*/
         }
-      } 
-      result.pixels[x + y*w] = color((int)(sumPixelsRed/sumCoeff), (int)(sumPixelsGreen/sumCoeff), (int)(sumPixelsBlue/sumCoeff));
+      }
+      result.pixels[x + y*w] = color((int)(sumBrightness/sumCoeff));
+      //result.pixels[x + y*w] = color((int)(sumPixelsRed/sumCoeff), (int)(sumPixelsGreen/sumCoeff), (int)(sumPixelsBlue/sumCoeff));
     }
   }
   result.updatePixels();
