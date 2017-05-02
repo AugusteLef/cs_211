@@ -27,8 +27,8 @@ void draw() {
     { 9, 12, 9 }, 
     { 12, 15, 12 }, 
     { 9, 12, 9 } };
-  PImage img2 = convolute(img, vKernel);
-
+  //PImage img2 = convolute(img, vKernel);
+  PImage img2 = scharr(img);
   image(img2, img.width, 0);
 }
 
@@ -128,6 +128,64 @@ PImage convolute(PImage img, float[][] kernel) {
   return result;
 }
 
+int[] convoluteForScharr(PImage img, float[][] kernel) {
+
+
+  float normFactor = 1.f;
+  int N = kernel.length;//kernel must be a square, odd is the best
+  // create a greyscale image (type: ALPHA) for output
+  int[] result = new int[img.width*img.height];
+
+  int w = img.width;
+  int h = img.height;
+  img.loadPixels();
+  
+  double sumCoeff = 0;
+  for (int i = 0; i < N; ++i) {
+    for (int j = 0; j < N; ++j) {
+      sumCoeff += abs(kernel[i][j]);
+    }
+  }
+
+  // for each (x,y) pixel in the image:
+  // - multiply intensities for pixels in the range
+  // (x - N/2, y - N/2) to (x + N/2, y + N/2) by the
+  // corresponding weights in the kernel matrix
+  // - sum all these intensities and divide it by normFactor
+  // - set result.pixels[y * img.width + x] to this value
+  for (int x = 0; x < w; ++x) {
+    for (int y = 0; y < h; ++y) {
+      
+      //For color blur, use these 3 valo
+      /*double sumPixelsRed = 0;
+      double sumPixelsGreen = 0;
+      double sumPixelsBlue = 0;*/
+      double sumBrightness = 0;
+      
+      for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+          float kernelVal = kernel[i][j];
+          if (kernelVal == 0) continue;
+          int xImg = x - N/2 + i;
+          int yImg = y - N/2 + j;
+          if (xImg < 0) xImg = 0;
+          else if (xImg >= w) xImg = w-1;
+          if (yImg < 0) yImg = 0;
+          else if (yImg >= h) yImg = h-1;
+
+          sumBrightness += kernelVal * brightness(img.pixels[xImg + yImg*w]);
+          /*sumPixelsRed += kernelVal * red(img.pixels[xImg + yImg*w]);
+          sumPixelsGreen += kernelVal * green(img.pixels[xImg + yImg*w]);
+          sumPixelsBlue += kernelVal * blue(img.pixels[xImg + yImg*w]);*/
+        }
+      }
+      result[x + y*w] = (int)(sumBrightness/sumCoeff);
+      //result.pixels[x + y*w] = color((int)(sumPixelsRed/sumCoeff), (int)(sumPixelsGreen/sumCoeff), (int)(sumPixelsBlue/sumCoeff));
+    }
+  }
+  return result;
+}
+
 PImage scharr(PImage img) {
   float[][] vKernel = {
     { 3, 0, -3 }, 
@@ -137,25 +195,21 @@ PImage scharr(PImage img) {
     { 3, 10, 3 }, 
     { 0, 0, 0 }, 
     { -3, -10, -3 } };
-  PImage result = createImage(img.width, img.height, ALPHA);
+  int h = img.height;
+  int w = img.width;
+  PImage result = createImage(w, h, ALPHA);
   // clear the image
-  for (int i = 0; i < img.width * img.height; i++) {
+  for (int i = 0; i < w * h; i++) {
     result.pixels[i] = color(0);
   }
   float max=0;
-  float[] buffer = new float[img.width * img.height];
+  float[] buffer = new float[w * h];
 
   // *************************************
   // Implement here the double convolution
   // *************************************
-  PImage sum_h = convolute(img, hKernel);
-  PImage sum_v = convolute(img, vKernel);
-  sum_h.loadPixels();
-  sum_v.loadPixels();
-  int[] sum_h_pix = sum_h.pixels;
-  int[] sum_v_pix = sum_v.pixels;
-  int h = img.height;
-  int w = img.width;
+  int[] sum_h_pix = convoluteForScharr(img, hKernel);
+  int[] sum_v_pix = convoluteForScharr(img, vKernel);
   for (int i = 0; i < h; ++i) {
     for (int j = 0; j < w; ++j) {
       buffer[i * w + j] = sqrt(pow(sum_h_pix[i * w + j], 2) + pow(sum_v_pix[i * w + j], 2));
@@ -164,8 +218,8 @@ PImage scharr(PImage img) {
   }
 
 
-  for (int y = 2; y < h - 2; y++) { // Skip top and bottom edges
-    for (int x = 2; x < w - 2; x++) { // Skip left and right
+  for (int y = 2; y < h - 2; ++y) { // Skip top and bottom edges
+    for (int x = 2; x < w - 2; ++x) { // Skip left and right
       int val=(int) ((buffer[y * w + x] / max)*255);
       result.pixels[y * w + x]=color(val);
     }
