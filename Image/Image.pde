@@ -1,20 +1,21 @@
 PImage img;
 HScrollbar thresholdBarHueMin;
 HScrollbar thresholdBarHueMax;
+BlobDetection blob = new BlobDetection();
 void settings() {
   size(1600, 600);
 }
 void setup() {
-
-  img = loadImage("board1.jpg");
-  thresholdBarHueMin = new HScrollbar(0, 580, 800, 20);
-  thresholdBarHueMax = new HScrollbar(0, 540, 800, 20);
-  //noLoop(); // no interactive behaviour: draw() will be called only once.
+  img = loadImage("BlobDetection_Test.bmp");
+  //img = loadImage("board1.jpg");
+  //thresholdBarHueMin = new HScrollbar(0, 580, 800, 20);
+  //thresholdBarHueMax = new HScrollbar(0, 540, 800, 20);
+  noLoop(); // no interactive behaviour: draw() will be called only once.
 }
 void draw() {
   background(color(0, 0, 0));
   image(img, 0, 0);
-  thresholdBarHueMin.display();
+  /*thresholdBarHueMin.display();
   thresholdBarHueMin.update();
   thresholdBarHueMax.display();
   thresholdBarHueMax.update();
@@ -27,8 +28,8 @@ void draw() {
     { 9, 12, 9 }, 
     { 12, 15, 12 }, 
     { 9, 12, 9 } };
-  //PImage img2 = convolute(img, vKernel);
-  PImage img2 = scharr(img);
+  //PImage img2 = convolute(img, vKernel);*/
+  PImage img2 = blob.findConnectedComponents(img, true);
   image(img2, img.width, 0);
 }
 
@@ -115,13 +116,11 @@ PImage convolute(PImage img, float[][] kernel) {
           else if (yImg >= h) yImg = h-1;
 
           sumBrightness += kernelVal * brightness(img.pixels[xImg + yImg*w]);
-          /*sumPixelsRed += kernelVal * red(img.pixels[xImg + yImg*w]);
-          sumPixelsGreen += kernelVal * green(img.pixels[xImg + yImg*w]);
-          sumPixelsBlue += kernelVal * blue(img.pixels[xImg + yImg*w]);*/
+          
         }
       }
       result.pixels[x + y*w] = color((int)(sumBrightness/sumCoeff));
-      //result.pixels[x + y*w] = color((int)(sumPixelsRed/sumCoeff), (int)(sumPixelsGreen/sumCoeff), (int)(sumPixelsBlue/sumCoeff));
+      
     }
   }
   result.updatePixels();
@@ -156,10 +155,7 @@ int[] convoluteForScharr(PImage img, float[][] kernel) {
   for (int x = 0; x < w; ++x) {
     for (int y = 0; y < h; ++y) {
       
-      //For color blur, use these 3 valo
-      /*double sumPixelsRed = 0;
-      double sumPixelsGreen = 0;
-      double sumPixelsBlue = 0;*/
+      
       double sumBrightness = 0;
       
       for (int i = 0; i < N; ++i) {
@@ -174,13 +170,11 @@ int[] convoluteForScharr(PImage img, float[][] kernel) {
           else if (yImg >= h) yImg = h-1;
 
           sumBrightness += kernelVal * brightness(img.pixels[xImg + yImg*w]);
-          /*sumPixelsRed += kernelVal * red(img.pixels[xImg + yImg*w]);
-          sumPixelsGreen += kernelVal * green(img.pixels[xImg + yImg*w]);
-          sumPixelsBlue += kernelVal * blue(img.pixels[xImg + yImg*w]);*/
+          
         }
       }
       result[x + y*w] = (int)(sumBrightness/sumCoeff);
-      //result.pixels[x + y*w] = color((int)(sumPixelsRed/sumCoeff), (int)(sumPixelsGreen/sumCoeff), (int)(sumPixelsBlue/sumCoeff));
+      
     }
   }
   return result;
