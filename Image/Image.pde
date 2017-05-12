@@ -1,35 +1,70 @@
+
+import processing.video.*;
+
 PImage img;
 HScrollbar thresholdBarHueMin;
 HScrollbar thresholdBarHueMax;
 BlobDetection blob = new BlobDetection();
+Hough hough = new Hough();
+Capture cam;
+
+
 void settings() {
   size(1600, 600);
 }
 void setup() {
-  img = loadImage("BlobDetection_Test.bmp");
-  //img = loadImage("board1.jpg");
-  //thresholdBarHueMin = new HScrollbar(0, 580, 800, 20);
-  //thresholdBarHueMax = new HScrollbar(0, 540, 800, 20);
-  noLoop(); // no interactive behaviour: draw() will be called only once.
+  String[] cameras = Capture.list();
+  if (cameras.length == 0) {
+    println("There are no cameras available for capture.");
+    exit();
+  } else {
+    println("Available cameras:");
+    for (int i = 0; i < cameras.length; i++) {
+      println(cameras[i]);
+    }
+    cam = new Capture(this, cameras[0]);
+    cam.start();
+  }
+
+
+  thresholdBarHueMin = new HScrollbar(0, 580, 800, 20);
+  thresholdBarHueMax = new HScrollbar(0, 540, 800, 20);
+  //noLoop(); // no interactive behaviour: draw() will be called only once.
 }
 void draw() {
+  if (cam.available() == true) {
+    cam.read();
+  }
+  img = cam.get();
+  
   background(color(0, 0, 0));
   image(img, 0, 0);
-  /*thresholdBarHueMin.display();
+
+  thresholdBarHueMin.display();
   thresholdBarHueMin.update();
+  println(thresholdBarHueMin.sliderPosition);
   thresholdBarHueMax.display();
   thresholdBarHueMax.update();
+  println(thresholdBarHueMax.sliderPosition);
 
 
 
-  //PImage img2 = thresholdHSB(img, (int)(thresholdBarHueMin.getPos()*255), (int)(thresholdBarHueMax.getPos()*255), 0, 255, 0, 255);
-  //PImage img2 = thresholdHSB(img, 100, 200, 100, 255, 45, 100);
-    float[][] vKernel = {
-    { 9, 12, 9 }, 
-    { 12, 15, 12 }, 
-    { 9, 12, 9 } };
-  //PImage img2 = convolute(img, vKernel);*/
-  PImage img2 = blob.findConnectedComponents(img, true);
+  PImage img2 = thresholdHSB(img, 112, 135, 86, 255, 0, 255);
+  //img2 = thresholdBinary(img2, 100,true);
+
+
+  float[][] blur = {
+    {9, 12, 9}, 
+    {12, 15, 12}, 
+    {9, 12, 9}
+  };
+  img2 = convolute(img2, blur);
+  img2 = scharr(img2);
+
+  img2 = thresholdBinary(img2, 100, false);
+  //img2 = blob.findConnectedComponents(img2, false);
+  hough.hough(img2);
+
   image(img2, img.width, 0);
 }
 
@@ -81,7 +116,7 @@ PImage convolute(PImage img, float[][] kernel) {
   int h = img.height;
   img.loadPixels();
   result.loadPixels();
-  
+
   double sumCoeff = 0;
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
@@ -97,13 +132,13 @@ PImage convolute(PImage img, float[][] kernel) {
   // - set result.pixels[y * img.width + x] to this value
   for (int x = 0; x < w; ++x) {
     for (int y = 0; y < h; ++y) {
-      
+
       //For color blur, use these 3 valo
       /*double sumPixelsRed = 0;
-      double sumPixelsGreen = 0;
-      double sumPixelsBlue = 0;*/
+       double sumPixelsGreen = 0;
+       double sumPixelsBlue = 0;*/
       double sumBrightness = 0;
-      
+
       for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
           float kernelVal = kernel[i][j];
@@ -116,11 +151,9 @@ PImage convolute(PImage img, float[][] kernel) {
           else if (yImg >= h) yImg = h-1;
 
           sumBrightness += kernelVal * brightness(img.pixels[xImg + yImg*w]);
-          
         }
       }
       result.pixels[x + y*w] = color((int)(sumBrightness/sumCoeff));
-      
     }
   }
   result.updatePixels();
@@ -138,7 +171,7 @@ int[] convoluteForScharr(PImage img, float[][] kernel) {
   int w = img.width;
   int h = img.height;
   img.loadPixels();
-  
+
   double sumCoeff = 0;
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
@@ -154,10 +187,10 @@ int[] convoluteForScharr(PImage img, float[][] kernel) {
   // - set result.pixels[y * img.width + x] to this value
   for (int x = 0; x < w; ++x) {
     for (int y = 0; y < h; ++y) {
-      
-      
+
+
       double sumBrightness = 0;
-      
+
       for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
           float kernelVal = kernel[i][j];
@@ -170,11 +203,9 @@ int[] convoluteForScharr(PImage img, float[][] kernel) {
           else if (yImg >= h) yImg = h-1;
 
           sumBrightness += kernelVal * brightness(img.pixels[xImg + yImg*w]);
-          
         }
       }
       result[x + y*w] = (int)(sumBrightness/sumCoeff);
-      
     }
   }
   return result;
