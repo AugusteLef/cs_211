@@ -1,9 +1,25 @@
 class Hough {
-  List<PVector> hough(PImage edgeImg) {
 
-    float discretizationStepsPhi = 0.06f; 
-    float discretizationStepsR = 2.5f;    
-    int minVotes=300;                      
+  float discretizationStepsPhi = 0.06f; 
+  float discretizationStepsR = 2.5f;
+  float[] tabSin = new float[(int)(PI/discretizationStepsPhi)];
+  float[] tabCos = new float[(int)(PI/discretizationStepsPhi)];
+  int minVotes=179;
+  Hough() {
+    // pre-compute the sin and cos values
+
+    float ang = 0;
+    float inverseR = 1.f / discretizationStepsR;
+    for (int accPhi = 0; accPhi < tabSin.length; ang += discretizationStepsPhi, accPhi++) {
+      // we can also pre-multiply by (1/discretizationStepsR) since we need it in the Hough loop
+      tabSin[accPhi] = (float) (Math.sin(ang) * inverseR);
+      tabCos[accPhi] = (float) (Math.cos(ang) * inverseR);
+    }
+  }
+  List<PVector> hough(PImage edgeImg, int nlines) {
+
+    ArrayList<Integer> bestCandidates = new ArrayList<Integer>();
+
 
     // dimensions of the accumulator
     int phiDim = (int) (Math.PI / discretizationStepsPhi +1);
@@ -25,35 +41,61 @@ class Hough {
           // Be careful: r may be negative, so you may want to center onto
           // the accumulator: r += rDim / 2
 
-          for (float phi = 0; phi < Math.PI; phi += discretizationStepsPhi) {
-            float r = x*cos(phi) + y*sin(phi) ;
-            accumulator[(int)(phi/discretizationStepsPhi * rDim + r/discretizationStepsR + rDim/2)] ++;
+          /*for (float phi = 0; phi < Math.PI; phi += discretizationStepsPhi) {
+           float r = x*cos(phi) + y*sin(phi) ;
+           accumulator[(int)(phi/discretizationStepsPhi * rDim + r/discretizationStepsR + rDim/2)] ++;
+           }*/
+          for (int indexTrig = 0; indexTrig < tabSin.length; ++indexTrig) {
+            float r = x*tabCos[indexTrig] + y*tabSin[indexTrig] ;
+            accumulator[(int)(indexTrig * rDim + r/discretizationStepsR + rDim/2)] ++;
           }
         }
       }
     }
-    /*PImage houghImg = createImage(rDim, phiDim, ALPHA);
-    for (int i = 0; i < accumulator.length; i++) {
-      houghImg.pixels[i] = color(min(255, accumulator[i]));
-    }
-    houghImg.resize(600, 600);
-    houghImg.updatePixels();
-    image(houghImg, img.width, 0);*/
+
     ArrayList<PVector> lines=new ArrayList<PVector>();
     for (int idx = 0; idx < accumulator.length; idx++) {
       if (accumulator[idx] > minVotes) {
-        // first, compute back the (r, phi) polar coordinates:
-        int accPhi = (int) (idx / (rDim));
-        int accR = idx - (accPhi) * (rDim);
-        float r = (accR - (rDim) * 0.5f) * discretizationStepsR;
-        float phi = accPhi * discretizationStepsPhi;
-        lines.add(new PVector(r, phi));
+        int x = idx % edgeImg.width;
+        int y = (int)(idx / edgeImg.width);
+        float localMax = accumulator[idx];
+        boolean exit = false;
+        for (int i = x - 5; i <= x + 5; ++i) {
+          for (int j = y - 5; y <= y + 5; ++j) {
+
+            if (i < 0 || i >= edgeImg.width || j < 0 || j >= edgeImg.height) {
+            } else {
+              println("w " + edgeImg.width + "i " + i + " j " + j);
+              println(accumulator[49*320 + 91]);
+              if (accumulator[j*edgeImg.width + i] > localMax) {
+
+                exit = true;
+                break;
+              }
+            }
+          }
+          if (exit)break;
+        }
+        if (!exit) {
+          // first, compute back the (r, phi) polar coordinates:
+          int accPhi = (int) (idx / (rDim));
+          int accR = idx - (accPhi) * (rDim);
+          float r = (accR - (rDim) * 0.5f) * discretizationStepsR;
+          float phi = accPhi * discretizationStepsPhi;
+          lines.add(new PVector(r, phi));
+          bestCandidates.add(lines.size()-1);
+        }
       }
     }
-    // Draw image accumulator
 
-    for (int idx = 0; idx < lines.size(); idx++) {
-      PVector line=lines.get(idx);
+    if (nlines < bestCandidates.size()) {
+      Collections.sort(bestCandidates, new HoughComparator(accumulator));
+    }
+
+    // Draw image accumulator
+    for (int idx = 0; idx < min(nlines, lines.size()); ++idx) {
+      int i = bestCandidates.get(idx);
+      PVector line=lines.get(i);
       float r = line.x;
       float phi = line.y;
       // Cartesian equation of a line: y = ax + b
@@ -63,13 +105,15 @@ class Hough {
       // compute the intersection of this line with the 4 borders of
       // the image
       int x0 = 0;
-      int y0 = (int) (r / sin(phi));
-      int x1 = (int) (r / cos(phi));
+      float sinPhi =  tabSin[(int)(phi/discretizationStepsPhi)];
+      float cosPhi = tabCos[(int)(phi/discretizationStepsPhi)];
+      int y0 = (int) (r / sinPhi);
+      int x1 = (int) (r / cosPhi);
       int y1 = 0;
       int x2 = edgeImg.width;
-      int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
+      int y2 = (int) (-cosPhi / sinPhi * x2 + r / sinPhi);
       int y3 = edgeImg.width;
-      int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+      int x3 = (int) (-(y3 - r / sinPhi) * (sinPhi / cosPhi));
       // Finally, plot the lines
       stroke(204, 102, 0);
       if (y0 > 0) {
@@ -86,13 +130,26 @@ class Hough {
           else
             line(x1, y1, x3, y3);
         } else
-          
-            line(x2, y2, x3, y3);
+
+          line(x2, y2, x3, y3);
       }
     }
 
 
 
+
     return lines;
+  }
+  class HoughComparator implements java.util.Comparator<Integer> {
+    int[] accumulator;
+    public HoughComparator(int[] accumulator) {
+      this.accumulator = accumulator;
+    }
+    @Override
+      public int compare(Integer l1, Integer l2) {
+      if (accumulator[l1] > accumulator[l2]
+        || (accumulator[l1] == accumulator[l2] && l1 < l2)) return -1;
+      return 1;
+    }
   }
 }

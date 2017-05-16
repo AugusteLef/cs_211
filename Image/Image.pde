@@ -4,6 +4,9 @@ import processing.video.*;
 PImage img;
 HScrollbar thresholdBarHueMin;
 HScrollbar thresholdBarHueMax;
+HScrollbar thresholdBarSatMin;
+HScrollbar thresholdBarSatMax;
+
 BlobDetection blob = new BlobDetection();
 Hough hough = new Hough();
 Capture cam;
@@ -22,13 +25,15 @@ void setup() {
     for (int i = 0; i < cameras.length; i++) {
       println(cameras[i]);
     }
-    cam = new Capture(this, cameras[5]);
+    cam = new Capture(this, cameras[1]);
     cam.start();
   }
 
 
   thresholdBarHueMin = new HScrollbar(0, 580, 800, 20);
   thresholdBarHueMax = new HScrollbar(0, 540, 800, 20);
+  thresholdBarSatMin = new HScrollbar(0, 500, 800, 20);
+  thresholdBarSatMax = new HScrollbar(0, 460, 800, 20);
   //noLoop(); // no interactive behaviour: draw() will be called only once.
 }
 void draw() {
@@ -36,18 +41,21 @@ void draw() {
     cam.read();
   }
   img = cam.get();
-  
+
   background(color(0, 0, 0));
   image(img, 0, 0);
 
-  /*thresholdBarHueMin.display();
+  thresholdBarHueMin.display();
   thresholdBarHueMin.update();
   thresholdBarHueMax.display();
-  thresholdBarHueMax.update();*/
+  thresholdBarHueMax.update();
+  println(thresholdBarHueMin.sliderPosition + " " + thresholdBarHueMax.sliderPosition);
 
 
+  // 100 150
+  // 86 255
 
-  PImage img2 = thresholdHSB(img, 100, 150, 86, 255, 0, 255);
+  PImage img2 = thresholdHSB(img, 55, 125, 86, 255, 0, 255);
   //img2 = thresholdBinary(img2, 100,true);
 
 
@@ -59,9 +67,9 @@ void draw() {
   img2 = convolute(img2, blur);
   img2 = scharr(img2);
 
-  img2 = thresholdBinary(img2, 100, false);
+  img2 = thresholdBinary(img2, 50, false);
   img2 = blob.findConnectedComponents(img2, false);
-  hough.hough(img2);
+  hough.hough(img2, 4);
 
   image(img2, img.width, 0);
 }
