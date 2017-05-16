@@ -38,16 +38,17 @@ class BlobDetection {
     input.loadPixels();
     int w = input.width;
     int h = input.height;
-
+    
+    int temp = 0;
     for (int y = 0; y < h; ++y) {
       for (int x = 0; x < w; ++x) {
-        if (input.pixels[y*w + x] == color(0)) {
-          labels[y*w + x] = 0;
+        if (input.pixels[temp + x] == color(0)) {
+          labels[temp + x] = 0;
         }else{
           List<Integer> ls = getNeighbours(x, y, w, h, labels);
           int minLabel = Collections.min(ls);
           int currLabel = (minLabel == Integer.MAX_VALUE ? currentLabel++ : minLabel);
-          labels[y*w + x] = currLabel;
+          labels[temp + x] = currLabel;
           
           if (!labelsEquivalence.containsKey(currLabel)) labelsEquivalence.put(currLabel, new HashSet<Integer>());
           Set<Integer> set = labelsEquivalence.get(currLabel);
@@ -59,6 +60,7 @@ class BlobDetection {
           }
         }
       }
+      temp += w;
     }
 
 
@@ -68,15 +70,17 @@ class BlobDetection {
     // if onlyBiggest==true, count the number of pixels for each label
     // TODO!
     int [] labelCount = new int[currentLabel];
+    temp = 0;
     for (int y = 0; y < h; ++y) {
       for (int x = 0; x < w; ++x) {
         for (Set<Integer> set : labelsEquivalence.values()) {
-          if (set.contains(labels[y*w + x])) {
-            labels[y*w + x] = Collections.min(set); 
-            if (onlyBiggest) labelCount[labels[y*w + y]]++;
+          if (set.contains(labels[temp + x])) {
+            labels[temp + x] = Collections.min(set); 
+            if (onlyBiggest) labelCount[labels[temp + y]]++;
           }
         }
       }
+      temp += w;
     }
 
 
@@ -88,30 +92,32 @@ class BlobDetection {
     PImage result = createImage(w, h, ALPHA);
     result.loadPixels();
     Map<Integer, Integer> toColorize = new HashMap<Integer, Integer>();
+    temp = 0;
     if (!onlyBiggest) {
       Random random = new Random();
       //colorblack :
       toColorize.put(0, color(0));
       for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-          int label = labels[y*w + x];
+          int label = labels[temp + x];
           if (toColorize.containsKey(label)) {
-            result.pixels[y*w + x] = toColorize.get(label);
+            result.pixels[temp + x] = toColorize.get(label);
             
           } else {
             int rgb = color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
             toColorize.put(label, rgb);
-            result.pixels[y*w + x] = rgb;
+            result.pixels[temp + x] = rgb;
           }
         }
-        
+        temp += w;
       }
     } else {
       for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-          if (labels[y*w + x] != currentLabel-1) result.pixels[y*w + x] = color(0);
-          else result.pixels[y*w + x] = color(255);
+          if (labels[temp + x] != currentLabel-1) result.pixels[temp + x] = color(0);
+          else result.pixels[temp + x] = color(255);
         }
+        temp += w;
       }
     }
     result.updatePixels();

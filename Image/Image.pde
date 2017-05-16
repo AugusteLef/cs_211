@@ -22,7 +22,7 @@ void setup() {
     for (int i = 0; i < cameras.length; i++) {
       println(cameras[i]);
     }
-    cam = new Capture(this, cameras[0]);
+    cam = new Capture(this, cameras[5]);
     cam.start();
   }
 
@@ -40,16 +40,14 @@ void draw() {
   background(color(0, 0, 0));
   image(img, 0, 0);
 
-  thresholdBarHueMin.display();
+  /*thresholdBarHueMin.display();
   thresholdBarHueMin.update();
-  println(thresholdBarHueMin.sliderPosition);
   thresholdBarHueMax.display();
-  thresholdBarHueMax.update();
-  println(thresholdBarHueMax.sliderPosition);
+  thresholdBarHueMax.update();*/
 
 
 
-  PImage img2 = thresholdHSB(img, 112, 135, 86, 255, 0, 255);
+  PImage img2 = thresholdHSB(img, 100, 150, 86, 255, 0, 255);
   //img2 = thresholdBinary(img2, 100,true);
 
 
@@ -62,7 +60,7 @@ void draw() {
   img2 = scharr(img2);
 
   img2 = thresholdBinary(img2, 100, false);
-  //img2 = blob.findConnectedComponents(img2, false);
+  img2 = blob.findConnectedComponents(img2, false);
   hough.hough(img2);
 
   image(img2, img.width, 0);

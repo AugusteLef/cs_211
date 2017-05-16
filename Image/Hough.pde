@@ -32,13 +32,13 @@ class Hough {
         }
       }
     }
-    PImage houghImg = createImage(rDim, phiDim, ALPHA);
+    /*PImage houghImg = createImage(rDim, phiDim, ALPHA);
     for (int i = 0; i < accumulator.length; i++) {
       houghImg.pixels[i] = color(min(255, accumulator[i]));
     }
     houghImg.resize(600, 600);
     houghImg.updatePixels();
-    image(houghImg, img.width, 0);
+    image(houghImg, img.width, 0);*/
     ArrayList<PVector> lines=new ArrayList<PVector>();
     for (int idx = 0; idx < accumulator.length; idx++) {
       if (accumulator[idx] > minVotes) {
