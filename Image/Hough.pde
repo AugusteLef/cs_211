@@ -62,14 +62,12 @@ class Hough {
         int y = (int)(idx / rDim);
         float localMax = accumulator[idx];
         boolean exit = false;
-        for (int i = x - 5; i <= x + 5; ++i) {
-          for (int j = y - 5; j <= y + 5; ++j) {
+        for (int i = x - 10; i <= x + 10; ++i) {
+          for (int j = y - 10; j <= y + 10; ++j) {
 
             if (i < 0 || i >= rDim || j < 0 || j >= phiDim) {
             } else {
-             // println("chouchou");
-              //println("w " + phiDim + "i " + i + " j " + j);
-              //println(accumulator[49*320 + 91]);
+            
               if (accumulator[j*rDim + i] > localMax) {
 
                 exit = true;
@@ -95,11 +93,20 @@ class Hough {
     if (nlines < bestCandidates.size()) {
       Collections.sort(bestCandidates, new HoughComparator(accumulator));
     }
-
+    ArrayList<PVector> bestLines = new ArrayList<PVector>();
     // Draw image accumulator
     for (int idx = 0; idx < min(nlines, lines.size()); ++idx) {
       int i = bestCandidates.get(idx);
       PVector line=lines.get(i);
+      bestLines.add(line);
+     
+    }
+
+    return bestLines;
+  }
+  void drawLines(List<PVector> lines, PImage img) {
+    for (PVector line : lines) {
+     
       float r = line.x;
       float phi = line.y;
       // Cartesian equation of a line: y = ax + b
@@ -114,11 +121,12 @@ class Hough {
       int y0 = (int) (r / sinPhi);
       int x1 = (int) (r / cosPhi);
       int y1 = 0;
-      int x2 = edgeImg.width;
+      int x2 = img.width;
       int y2 = (int) (-cosPhi / sinPhi * x2 + r / sinPhi);
-      int y3 = edgeImg.width;
+      int y3 = img.width;
       int x3 = (int) (-(y3 - r / sinPhi) * (sinPhi / cosPhi));
       // Finally, plot the lines
+     strokeWeight(10);
       stroke(204, 102, 0);
       if (y0 > 0) {
         if (x1 > 0)
@@ -139,10 +147,6 @@ class Hough {
       }
     }
 
-
-
-
-    return lines;
   }
   class HoughComparator implements java.util.Comparator<Integer> {
     int[] accumulator;
