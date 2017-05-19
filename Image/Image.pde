@@ -69,7 +69,7 @@ void draw() {
 
   img2 = thresholdBinary(img2, 50, false);
   img2 = blob.findConnectedComponents(img2, false);
-  hough.hough(img2, 4);
+  hough.hough(img2, 7);
 
   image(img2, img.width, 0);
 }

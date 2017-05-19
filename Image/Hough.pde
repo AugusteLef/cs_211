@@ -31,8 +31,8 @@ class Hough {
     // Fill the accumulator: on edge points (ie, white pixels of the edge
     // image), store all possible (r, phi) pairs describing lines going
     // through the point.
-    for (int y = 0; y < edgeImg.height; y++) {
-      for (int x = 0; x < edgeImg.width; x++) {
+    for (int y = 0; y < edgeImg.height; ++y) {
+      for (int x = 0; x < edgeImg.width; ++x) {
         // Are we on an edge?
         if (brightness(edgeImg.pixels[y * edgeImg.width + x]) != 0) {
           // ...determine here all the lines (r, phi) passing through
@@ -47,33 +47,37 @@ class Hough {
            }*/
           for (int indexTrig = 0; indexTrig < tabSin.length; ++indexTrig) {
             float r = x*tabCos[indexTrig] + y*tabSin[indexTrig] ;
-            accumulator[(int)(indexTrig * rDim + r/discretizationStepsR + rDim/2)] ++;
+            accumulator[(int)(indexTrig * rDim + r/discretizationStepsR + rDim/2)]++;
           }
         }
       }
     }
 
     ArrayList<PVector> lines=new ArrayList<PVector>();
-    for (int idx = 0; idx < accumulator.length; idx++) {
+    for (int idx = 0; idx < accumulator.length; ++idx) {
+      //if(idx%100 == 0){
+      //println(idx);}
       if (accumulator[idx] > minVotes) {
-        int x = idx % edgeImg.width;
-        int y = (int)(idx / edgeImg.width);
+        int x = idx % rDim;
+        int y = (int)(idx / rDim);
         float localMax = accumulator[idx];
         boolean exit = false;
         for (int i = x - 5; i <= x + 5; ++i) {
-          for (int j = y - 5; y <= y + 5; ++j) {
+          for (int j = y - 5; j <= y + 5; ++j) {
 
-            if (i < 0 || i >= edgeImg.width || j < 0 || j >= edgeImg.height) {
+            if (i < 0 || i >= rDim || j < 0 || j >= phiDim) {
             } else {
-              println("w " + edgeImg.width + "i " + i + " j " + j);
-              println(accumulator[49*320 + 91]);
-              if (accumulator[j*edgeImg.width + i] > localMax) {
+             // println("chouchou");
+              //println("w " + phiDim + "i " + i + " j " + j);
+              //println(accumulator[49*320 + 91]);
+              if (accumulator[j*rDim + i] > localMax) {
 
                 exit = true;
                 break;
               }
             }
           }
+         
           if (exit)break;
         }
         if (!exit) {
