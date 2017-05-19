@@ -4,7 +4,7 @@ class Hough {
   float discretizationStepsR = 2.5f;
   float[] tabSin = new float[(int)(PI/discretizationStepsPhi)];
   float[] tabCos = new float[(int)(PI/discretizationStepsPhi)];
-  int minVotes=179;
+  int minVotes=200;
   Hough() {
     // pre-compute the sin and cos values
 

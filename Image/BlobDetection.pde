@@ -43,13 +43,13 @@ class BlobDetection {
     int temp = 0;
     for (int y = 0; y < h; ++y) {
       for (int x = 0; x < w; ++x) {
-        if (input.pixels[temp + x] == color(0)) {
-          labels[temp + x] = 0;
+        if (input.pixels[w*y + x] == color(0)) {
+          labels[w*y + x] = 0;
         } else {
           List<Integer> ls = getNeighbours(x, y, w, h, labels);
           int minLabel = Collections.min(ls);
           int currLabel = (minLabel == Integer.MAX_VALUE ? currentLabel++ : minLabel);
-          labels[temp + x] = currLabel;
+          labels[w*y + x] = currLabel;
 
           if (!labelsEquivalence.containsKey(currLabel)) labelsEquivalence.put(currLabel, new HashSet<Integer>());
           Set<Integer> set = labelsEquivalence.get(currLabel);
@@ -61,7 +61,7 @@ class BlobDetection {
           }
         }
       }
-      temp += w;
+      
     }
 
 
@@ -70,7 +70,8 @@ class BlobDetection {
     // Second pass: re-label the pixels by their equivalent class
     // if onlyBiggest==true, count the number of pixels for each label
     // TODO!
-    Integer [] labelCount = new Integer[currentLabel];
+    //Map<Integer, Integer> labelCount = new HashMap<Integer, Integer>();
+    int [] labelCount = new int[currentLabel];
 
     for (int y = 0; y < h; ++y) {
       for (int x = 0; x < w; ++x) {
@@ -78,7 +79,7 @@ class BlobDetection {
           if (set.contains(labels[w*y + x])) {
             labels[w*y + x] = Collections.min(set); 
             
-            //labelCount[labels[w*y + x]]++ ;
+            labelCount[labels[w*y + x]] += 1;
           }
         }
       }
@@ -93,8 +94,13 @@ class BlobDetection {
     PImage result = createImage(w, h, ALPHA);
     result.loadPixels();
     Map<Integer, Integer> toColorize = new HashMap<Integer, Integer>();
+    //List<Integer> l = Arrays.asList(labelCount);
     //int maxCount = (int) Collections.min(Arrays.asList(labelCount));
-
+    int maxCount = 0;
+    for (int i = 0; i < labelCount.length; ++i) 
+      if (labelCount[i] > maxCount) maxCount = labelCount[i]; 
+     
+    
 
     Random random = new Random();
     //colorblack :
@@ -103,7 +109,7 @@ class BlobDetection {
       for (int x = 0; x < w; ++x) {
         int label = labels[w*y + x];
 
-        if (/*(onlyBiggest && labelCount[label] == maxCount)|| */!onlyBiggest) 
+        if ((onlyBiggest && labelCount[label] == maxCount)|| !onlyBiggest) 
           if (toColorize.containsKey(label)) {
             result.pixels[w*y + x] = toColorize.get(label);
           } else {
