@@ -51,13 +51,21 @@ class BlobDetection {
           int currLabel = (minLabel == Integer.MAX_VALUE ? currentLabel++ : minLabel);
           labels[w*y + x] = currLabel;
 
-          if (!labelsEquivalence.containsKey(currLabel)) labelsEquivalence.put(currLabel, new HashSet<Integer>());
+          if (!labelsEquivalence.containsKey(currLabel)) {
+            Set<Integer> set = new HashSet<Integer>();
+            set.add(currLabel);
+            labelsEquivalence.put(currLabel, set);
+          }
+
           Set<Integer> set = labelsEquivalence.get(currLabel);
           for (int neighbourLabel : ls) {
-            if (neighbourLabel < Integer.MAX_VALUE) {
-              set.add(neighbourLabel);
-              labelsEquivalence.get(neighbourLabel).add(currLabel);
-            }
+            if (neighbourLabel < Integer.MAX_VALUE)
+              set.addAll(labelsEquivalence.get(neighbourLabel));
+          }
+
+          for (int neighbourLabel : ls) {
+            if (neighbourLabel < Integer.MAX_VALUE)
+              labelsEquivalence.get(neighbourLabel).addAll(set);
           }
         }
       }
@@ -66,20 +74,22 @@ class BlobDetection {
 
 
 
+
     // Second pass: re-label the pixels by their equivalent class
     // if onlyBiggest==true, count the number of pixels for each label
     // TODO!
     //Map<Integer, Integer> labelCount = new HashMap<Integer, Integer>();
+    int [] labelVal = new int[currentLabel];
     int [] labelCount = new int[currentLabel];
-    Arrays.fill(labelCount, Integer.MAX_VALUE); 
+    Arrays.fill(labelVal, Integer.MAX_VALUE); 
 
     int minCurrVal;
     for (int i = 0; i < currentLabel; ++i) {
-      labelCount[i] = Math.min(i, labelCount[i]);
+      labelVal[i] = Math.min(i, labelVal[i]);
       for (Set<Integer> set : labelsEquivalence.values()) {
         if (set.contains(i)) {
           minCurrVal = Collections.min(set);
-          labelCount[i] = Math.min(minCurrVal, labelCount[i]);
+          labelVal[i] = Math.min(minCurrVal, labelVal[i]);
         }
       }
     }
@@ -92,7 +102,10 @@ class BlobDetection {
       for (int x = 0; x < w; ++x) {
         total = temp + x;
         currentElem = labels[total];
-        if (currentElem != 0) labels[total] = labelCount[currentElem];
+        if (currentElem != 0) {
+          labels[total] = labelVal[currentElem];
+          labelCount[labels[total]]++;
+        }
       }
       temp += w;
     }
@@ -112,7 +125,7 @@ class BlobDetection {
     int maxCount = 0;
     if (onlyBiggest)
       for (int i = 0; i < labelCount.length; ++i) 
-        if (labelCount[i] > maxCount) maxCount = labelCount[i]; 
+        if (labelVal[i] > maxCount) maxCount = labelCount[i]; 
 
 
 

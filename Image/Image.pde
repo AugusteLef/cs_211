@@ -50,8 +50,8 @@ void draw() {
   }
   img = cam.get();*/
   
-  //img = imgs.get(++test%4);
-  img = imgs.get(2);
+  img = imgs.get(++test%4);
+  //img = imgs.get(2);
   delay(2000);
   background(color(0, 0, 0));
   image(img, 0, 0);
@@ -82,11 +82,10 @@ void draw() {
   
   img2 = convolute(img2, blur);
   //image(img2, img2.width,0);
-  img2 = blob.findConnectedComponents(img2, false);
-  image(img2, img2.width,0);
+  img2 = blob.findConnectedComponents(img2, true);
+  image(img2, img2.width, 0);
   //
   img2 = convolute(img2, blur);
-  
   img2 = scharr(img2);
   img2 = thresholdBinary(img2, 50,false);
 
@@ -100,8 +99,6 @@ void draw() {
   }
   
   
-
-  //image(img2, img2.width, 0);
 }
 
 PImage thresholdBinary(PImage img, int threshold, boolean inverted) {
