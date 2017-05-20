@@ -61,7 +61,6 @@ class BlobDetection {
           }
         }
       }
-      
     }
 
 
@@ -72,18 +71,32 @@ class BlobDetection {
     // TODO!
     //Map<Integer, Integer> labelCount = new HashMap<Integer, Integer>();
     int [] labelCount = new int[currentLabel];
+    Arrays.fill(labelCount, Integer.MAX_VALUE); 
 
-    for (int y = 0; y < h; ++y) {
-      for (int x = 0; x < w; ++x) {
-        for (Set<Integer> set : labelsEquivalence.values()) {
-          if (set.contains(labels[w*y + x])) {
-            labels[w*y + x] = Collections.min(set); 
-            
-            labelCount[labels[w*y + x]] += 1;
-          }
+    int minCurrVal;
+    for (int i = 0; i < currentLabel; ++i) {
+      labelCount[i] = Math.min(i, labelCount[i]);
+      for (Set<Integer> set : labelsEquivalence.values()) {
+        if (set.contains(i)) {
+          minCurrVal = Collections.min(set);
+          labelCount[i] = Math.min(minCurrVal, labelCount[i]);
         }
       }
     }
+
+
+    temp = 0;
+    int total;
+    int currentElem;
+    for (int y = 0; y < h; ++y) {
+      for (int x = 0; x < w; ++x) {
+        total = temp + x;
+        currentElem = labels[total];
+        if (currentElem != 0) labels[total] = labelCount[currentElem];
+      }
+      temp += w;
+    }
+
 
 
 
@@ -97,27 +110,32 @@ class BlobDetection {
     //List<Integer> l = Arrays.asList(labelCount);
     //int maxCount = (int) Collections.min(Arrays.asList(labelCount));
     int maxCount = 0;
-    for (int i = 0; i < labelCount.length; ++i) 
-      if (labelCount[i] > maxCount) maxCount = labelCount[i]; 
-     
-    
+    if (onlyBiggest)
+      for (int i = 0; i < labelCount.length; ++i) 
+        if (labelCount[i] > maxCount) maxCount = labelCount[i]; 
+
+
 
     Random random = new Random();
     //colorblack :
     toColorize.put(0, color(0));
+    temp = 0;
+    total = 0;
     for (int y = 0; y < h; ++y) {
       for (int x = 0; x < w; ++x) {
-        int label = labels[w*y + x];
+        total = temp + x;
+        int label = labels[total];
 
-        if ((onlyBiggest && labelCount[label] == maxCount)|| !onlyBiggest) 
+        if (!onlyBiggest || labelCount[label] == maxCount)
           if (toColorize.containsKey(label)) {
-            result.pixels[w*y + x] = toColorize.get(label);
+            result.pixels[total] = toColorize.get(label);
           } else {
             int rgb = color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
             toColorize.put(label, rgb);
-            result.pixels[w*y + x] = rgb;
+            result.pixels[total] = rgb;
           }
       }
+      temp += w;
     }
 
 
