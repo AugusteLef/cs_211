@@ -37,7 +37,7 @@ void setup() {
   thresholdBarHueMax = new HScrollbar(0, 540, 800, 20);
   thresholdBarSatMin = new HScrollbar(0, 500, 800, 20);
   thresholdBarSatMax = new HScrollbar(0, 460, 800, 20);
-  //noLoop(); // no interactive behaviour: draw() will be called only once.
+  noLoop(); // no interactive behaviour: draw() will be called only once.
   
   imgs.add(loadImage("board1.jpg"));
   imgs.add(loadImage("board2.jpg"));
@@ -50,8 +50,8 @@ void draw() {
   }
   img = cam.get();*/
   
-  img = imgs.get(++test%4);
-  //img = imgs.get(2);
+  //img = imgs.get(++test%4);
+  img = imgs.get(2);
   delay(2000);
   background(color(0, 0, 0));
   image(img, 0, 0);

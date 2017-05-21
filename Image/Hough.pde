@@ -41,14 +41,14 @@ class Hough {
           // Be careful: r may be negative, so you may want to center onto
           // the accumulator: r += rDim / 2
 
-          /*for (float phi = 0; phi < Math.PI; phi += discretizationStepsPhi) {
+          for (float phi = 0; phi < Math.PI; phi += discretizationStepsPhi) {
            float r = x*cos(phi) + y*sin(phi) ;
            accumulator[(int)(phi/discretizationStepsPhi * rDim + r/discretizationStepsR + rDim/2)] ++;
-           }*/
-          for (int indexTrig = 0; indexTrig < tabSin.length; ++indexTrig) {
+           }
+          /*for (int indexTrig = 0; indexTrig < tabSin.length; ++indexTrig) {
             float r = x*tabCos[indexTrig] + y*tabSin[indexTrig] ;
             accumulator[(int)(indexTrig * rDim + r/discretizationStepsR + rDim/2)]++;
-          }
+          }*/
         }
       }
     }
@@ -111,15 +111,15 @@ class Hough {
       // compute the intersection of this line with the 4 borders of
       // the image
       int x0 = 0;
-      float sinPhi =  tabSin[(int)(phi/discretizationStepsPhi)];
+      float sinPhi = tabSin[(int)(phi/discretizationStepsPhi)];
       float cosPhi = tabCos[(int)(phi/discretizationStepsPhi)];
-      int y0 = (int) (r / sinPhi);
-      int x1 = (int) (r / cosPhi);
+      int y0 = (int) (r / sin(phi));
+      int x1 = (int) (r / cos(phi));
       int y1 = 0;
       int x2 = img.width;
-      int y2 = (int) (-cosPhi / sinPhi * x2 + r / sinPhi);
+      int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
       int y3 = img.width;
-      int x3 = (int) (-(y3 - r / sinPhi) * (sinPhi / cosPhi));
+      int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
       // Finally, plot the lines
      strokeWeight(5);
       stroke(204, 102, 0);
