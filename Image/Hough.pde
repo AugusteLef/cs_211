@@ -4,7 +4,7 @@ class Hough {
   float discretizationStepsR = 2.5f;
   float[] tabSin = new float[(int)(PI/discretizationStepsPhi)];
   float[] tabCos = new float[(int)(PI/discretizationStepsPhi)];
-  int minVotes=200;
+  int minVotes=50;
   Hough() {
     // pre-compute the sin and cos values
 
@@ -77,29 +77,26 @@ class Hough {
           if (exit)break;
         }
         if (!exit) {
-          // first, compute back the (r, phi) polar coordinates:
-          int accPhi = (int) (idx / (rDim));
-          int accR = idx - (accPhi) * (rDim);
-          float r = (accR - (rDim) * 0.5f) * discretizationStepsR;
-          float phi = accPhi * discretizationStepsPhi;
-          lines.add(new PVector(r, phi));
-          bestCandidates.add(lines.size()-1);
+           bestCandidates.add(idx);
         }
       }
     }
 
-    if (nlines < bestCandidates.size()) {
+    if (nlines <= bestCandidates.size()) {
       Collections.sort(bestCandidates, new HoughComparator(accumulator));
     }
     ArrayList<PVector> bestLines = new ArrayList<PVector>();
-    // Draw image accumulator
-    for (int idx = 0; idx < min(nlines, lines.size()); ++idx) {
-      int i = bestCandidates.get(idx);
-      PVector line=lines.get(i);
+    
+    for (int i = 0; i < min(nlines, bestCandidates.size()); ++i) {
+      int idx = bestCandidates.get(i);
+      int accPhi = (int) (idx / (rDim));
+      int accR = idx - (accPhi) * (rDim);
+      float r = (accR - (rDim) * 0.5f) * discretizationStepsR;
+      float phi = accPhi * discretizationStepsPhi;
+      PVector line = new PVector(r, phi);
       bestLines.add(line);
      
     }
-
     return bestLines;
   }
   void drawLines(List<PVector> lines, PImage img) {
@@ -124,7 +121,7 @@ class Hough {
       int y3 = img.width;
       int x3 = (int) (-(y3 - r / sinPhi) * (sinPhi / cosPhi));
       // Finally, plot the lines
-     strokeWeight(10);
+     strokeWeight(5);
       stroke(204, 102, 0);
       if (y0 > 0) {
         if (x1 > 0){

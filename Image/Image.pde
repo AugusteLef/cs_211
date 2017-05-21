@@ -51,6 +51,7 @@ void draw() {
   img = cam.get();*/
   
   img = imgs.get(++test%4);
+  //img = imgs.get(2);
   delay(2000);
   background(color(0, 0, 0));
   image(img, 0, 0);
@@ -85,17 +86,18 @@ void draw() {
   
   img2 = convolute(img2, blur);
   img2 = scharr(img2);
-  img2 = thresholdBinary(img2, 50,false);
+  //img2 = thresholdBinary(img2, 50,false);
 
   List<PVector> edges = hough.hough(img2, 4);
   for(PVector p : edges)println(p);
   hough.drawLines(edges,img2);
   
   List<PVector> vertices = qg.findBestQuad(edges,img2.width,img2.height,img2.width*img2.height,200,true);
+  
   for (PVector pv : vertices) {
      ellipse(pv.x*2.5, pv.y*2.5, 20, 20); 
   }
-    image(img2, img2.width, 0);
+  image(img2, img2.width, 0);
 
   
 }
