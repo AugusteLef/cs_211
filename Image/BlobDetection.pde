@@ -103,8 +103,9 @@ class BlobDetection {
         total = temp + x;
         currentElem = labels[total];
         if (currentElem != 0) {
-          labels[total] = labelVal[currentElem];
-          labelCount[labels[total]]++;
+          currentElem = labelVal[currentElem];
+          labels[total] = currentElem;
+          labelCount[currentElem]++;
         }
       }
       temp += w;
@@ -125,7 +126,7 @@ class BlobDetection {
     int maxCount = 0;
     if (onlyBiggest)
       for (int i = 0; i < labelCount.length; ++i) 
-        if (labelVal[i] > maxCount) maxCount = labelCount[i]; 
+        if (labelCount[i] > maxCount) maxCount = labelCount[i]; 
 
 
 

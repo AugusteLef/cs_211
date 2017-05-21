@@ -51,7 +51,6 @@ void draw() {
   img = cam.get();*/
   
   img = imgs.get(++test%4);
-  //img = imgs.get(2);
   delay(2000);
   background(color(0, 0, 0));
   image(img, 0, 0);
@@ -76,28 +75,28 @@ void draw() {
   };
   
   //PImage img2 = thresholdHSB(img, 67, 138, 86, 255,0, 255);
-  PImage img2 = thresholdHSB(img, 67, 138, 86, 255,0, 255);  
+  PImage img2 = thresholdHSB(img, 67, 138, 86, 255,35, 200);  
   //image(img2, img2.width,0);
   img2 = thresholdBinary(img2, 10,false);
   
   img2 = convolute(img2, blur);
   //image(img2, img2.width,0);
   img2 = blob.findConnectedComponents(img2, true);
-  image(img2, img2.width, 0);
-  //
+  
   img2 = convolute(img2, blur);
   img2 = scharr(img2);
   img2 = thresholdBinary(img2, 50,false);
 
   List<PVector> edges = hough.hough(img2, 4);
-  
+  for(PVector p : edges)println(p);
   hough.drawLines(edges,img2);
   
-  List<PVector> vertices = qg.findBestQuad(edges,img2.width*2,img2.height*2,img2.width*img2.height,200,true);
+  List<PVector> vertices = qg.findBestQuad(edges,img2.width,img2.height,img2.width*img2.height,200,true);
   for (PVector pv : vertices) {
      ellipse(pv.x*2.5, pv.y*2.5, 20, 20); 
   }
-  
+    image(img2, img2.width, 0);
+
   
 }
 

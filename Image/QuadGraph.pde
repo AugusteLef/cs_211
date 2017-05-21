@@ -89,7 +89,9 @@ class QuadGraph {
     int x = (int) ((r2 * sin_t1 - r1 * sin_t2) / denom);
     int y = (int) ((-r2 * cos_t1 + r1 * cos_t2) / denom);
 
-    if (0 <= x && 0 <= y && width >= x && height >= y)
+    //if (0 <= x && 0 <= y && width >= x && height >= y)TODO
+    if (-width <= x && -height <= y && 2*width >= x && 2*height >= y)
+
       return true;
     else
       return false;
