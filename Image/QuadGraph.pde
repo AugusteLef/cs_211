@@ -12,8 +12,8 @@ class QuadGraph {
 
   List<PVector> findBestQuad(List<PVector> lines, int width, int height, int max_quad_area, int min_quad_area, boolean verbose) {
     
-    this.verbose=verbose; //<>//
-    build(lines, width, height); //<>//
+    this.verbose=verbose; //<>// //<>//
+    build(lines, width, height); //<>// //<>//
     findCycles(verbose);
     ArrayList<PVector> bestQuad=new ArrayList<PVector>();
     float bestQuadArea=0;
@@ -61,8 +61,8 @@ class QuadGraph {
 
     int idx =0;
 
-    for (int i = 0; i < lines.size(); i++) {
-      for (int j = i + 1; j < lines.size(); j++) {
+    for (int i = 0; i < lines.size(); ++i) {
+      for (int j = i + 1; j < lines.size(); ++j) {
         if (intersect(lines.get(i), lines.get(j), width, height)) {
 
           graph[idx][0]=i;
@@ -90,8 +90,7 @@ class QuadGraph {
     int x = (int) ((r2 * sin_t1 - r1 * sin_t2) / denom);
     int y = (int) ((-r2 * cos_t1 + r1 * cos_t2) / denom);
 
-    //if (0 <= x && 0 <= y && width >= x && height >= y)
-    if (-width <= x && -height <= y && 2*width >= x && 2*height >= y)
+    if (0 <= x && 0 <= y && width >= x && height >= y)
 
       return true;
     else

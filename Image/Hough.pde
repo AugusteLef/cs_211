@@ -1,21 +1,24 @@
 class Hough {
-
+  private final static int RADIUS_AREA = 10;
   float discretizationStepsPhi = 0.06f; 
   float discretizationStepsR = 2.5f;
-  float[] tabSin = new float[(int)(PI/discretizationStepsPhi)];
-  float[] tabCos = new float[(int)(PI/discretizationStepsPhi)];
+  Map<Float, Float> tabSin = new HashMap();
+  Map<Float, Float> tabCos = new HashMap();
   int minVotes=50;
-  Hough() {
-    // pre-compute the sin and cos values
-
-    float ang = 0;
-    float inverseR = 1.f / discretizationStepsR;
-    for (int accPhi = 0; accPhi < tabSin.length; ang += discretizationStepsPhi, accPhi++) {
-      // we can also pre-multiply by (1/discretizationStepsR) since we need it in the Hough loop
-      tabSin[accPhi] = (float) (Math.sin(ang) * inverseR);
-      tabCos[accPhi] = (float) (Math.cos(ang) * inverseR);
-    }
+  
+  float gcos(float cos){
+    if(tabCos.containsKey(cos))return tabCos.get(cos);
+    float out = cos(cos);
+    tabCos.put(cos, out);
+    return out;
   }
+  float gsin(float sin){
+    if(tabSin.containsKey(sin))return tabSin.get(sin);
+    float out = sin(sin);
+    tabSin.put(sin, out);
+    return out;
+  }
+  
   List<PVector> hough(PImage edgeImg, int nlines) {
 
     ArrayList<Integer> bestCandidates = new ArrayList<Integer>();
@@ -42,7 +45,7 @@ class Hough {
           // the accumulator: r += rDim / 2
 
           for (float phi = 0; phi < Math.PI; phi += discretizationStepsPhi) {
-           float r = x*cos(phi) + y*sin(phi) ;
+           float r = x*gcos(phi) + y*gsin(phi) ;
            accumulator[(int)(phi/discretizationStepsPhi * rDim + r/discretizationStepsR + rDim/2)] ++;
            }
           
@@ -55,8 +58,10 @@ class Hough {
         int y = (int)(idx / rDim);
         float localMax = accumulator[idx];
         boolean exit = false;
-        for (int i = x - 10; i <= x + 10; ++i) {
-          for (int j = y - 10; j <= y + 10; ++j) {
+        int xSize = x + RADIUS_AREA;
+        int ySize = y + RADIUS_AREA;
+        for (int i = x - RADIUS_AREA; i <= xSize; ++i) {
+          for (int j = y - RADIUS_AREA; j <= ySize; ++j) {
 
             if (i < 0 || i >= rDim || j < 0 || j >= phiDim) {
             } else {
@@ -106,15 +111,18 @@ class Hough {
       // compute the intersection of this line with the 4 borders of
       // the image
       int x0 = 0;
-      float sinPhi = tabSin[(int)(phi/discretizationStepsPhi)];
-      float cosPhi = tabCos[(int)(phi/discretizationStepsPhi)];
-      int y0 = (int) (r / sin(phi));
-      int x1 = (int) (r / cos(phi));
+      //TODO
+      float sinPhi = gsin(phi);
+      float rSinPhi = r/sinPhi;
+      float cosPhi = gcos(phi);
+      float rCosPhi = r/cosPhi;
+      int y0 = (int) rSinPhi;
+      int x1 = (int)rCosPhi;
       int y1 = 0;
       int x2 = img.width;
-      int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
+      int y2 = (int) (- cosPhi / sinPhi * x2 + rSinPhi);
       int y3 = img.width;
-      int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+      int x3 = (int) (-(y3 - rSinPhi) * (sinPhi / cosPhi));
       // Finally, plot the lines
      strokeWeight(5);
       stroke(204, 102, 0);

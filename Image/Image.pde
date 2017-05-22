@@ -10,10 +10,10 @@ void settings() {
   size(1600, 1200);
 }
 void setup() {
-  img = loadImage("board4.jpg");
+  img = loadImage("board1.jpg");
+  noLoop();
 }
 void draw() {
-  delay(2000);
   background(color(0, 0, 0));
   image(img, 0, 0);
   
@@ -49,7 +49,8 @@ PImage thresholdBinary(PImage img, int threshold, boolean inverted) {
   img.loadPixels();
   PImage result = createImage(img.width, img.height, RGB);
   result.loadPixels();
-  for (int i = 0; i < img.width * img.height; i++) {
+  int sizeMax = img.width * img.height;
+  for (int i = 0; i < sizeMax; i++) {
     // do something with the pixel img.pixels[i]
     if (brightness(img.pixels[i])<threshold)result.pixels[i] = color(inverted ? 255 : 0);
     else result.pixels[i] = color(inverted ? 0 : 255);
@@ -60,7 +61,8 @@ PImage thresholdHSB(PImage img, int hueMin, int hueMax, int satMin, int satMax, 
   img.loadPixels();
   PImage result = createImage(img.width, img.height, RGB);
   result.loadPixels();
-  for (int i = 0; i < img.width * img.height; i++) {
+  int sizeMax = img.width * img.height;
+  for (int i = 0; i < sizeMax; i++) {
 
     int hue = (int)hue(img.pixels[i]);
     int sat = (int)saturation(img.pixels[i]);
