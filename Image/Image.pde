@@ -1,105 +1,47 @@
-int test = 0;
-import processing.video.*;
-
 PImage img;
-HScrollbar thresholdBarHueMin;
-HScrollbar thresholdBarHueMax;
-HScrollbar thresholdBarSatMin;
-HScrollbar thresholdBarSatMax;
 Random rd = new Random();
-
 BlobDetection blob = new BlobDetection();
 Hough hough = new Hough();
-Capture cam;
 QuadGraph qg = new QuadGraph();
-ArrayList<PImage> imgs = new ArrayList<PImage>();
+//import processing.video.*;
+//Capture cam;
 
 void settings() {
-  size(1600, 600);
+  size(1600, 1200);
 }
 void setup() {
-  
-  /*String[] cameras = Capture.list();
-  if (cameras.length == 0) {
-    println("There are no cameras available for capture.");
-    exit();
-  } else {
-    println("Available cameras:");
-    for (int i = 0; i < cameras.length; i++) {
-      println(cameras[i]);
-    }
-    cam = new Capture(this, cameras[1]);
-    cam.start();
-  }*/
-
-
-  thresholdBarHueMin = new HScrollbar(0, 580, 800, 20);
-  thresholdBarHueMax = new HScrollbar(0, 540, 800, 20);
-  thresholdBarSatMin = new HScrollbar(0, 500, 800, 20);
-  thresholdBarSatMax = new HScrollbar(0, 460, 800, 20);
-  //noLoop(); // no interactive behaviour: draw() will be called only once.
-  
-  imgs.add(loadImage("board1.jpg"));
-  imgs.add(loadImage("board2.jpg"));
-  imgs.add(loadImage("board3.jpg"));
-  imgs.add(loadImage("board4.jpg"));
+  img = loadImage("board4.jpg");
 }
 void draw() {
-  /*if (cam.available() == true) {
-    cam.read();
-  }
-  img = cam.get();*/
-  
-  img = imgs.get(++test%4);
-  //img = imgs.get(2);
   delay(2000);
   background(color(0, 0, 0));
   image(img, 0, 0);
-
-  /*thresholdBarHueMin.display();
-  thresholdBarHueMin.update();
-  thresholdBarHueMax.display();
-  thresholdBarHueMax.update();
-  thresholdBarSatMin.display();
-  thresholdBarSatMin.update();
-  thresholdBarSatMax.display();
-  thresholdBarSatMax.update();
-  println(thresholdBarHueMin.sliderPosition + " " + thresholdBarHueMax.sliderPosition);*/
-
   
-  // 100 150
-  // 86 255
   float[][] blur = {
     {9, 12, 9}, 
     {12, 15, 12}, 
     {9, 12, 9}
   };
   
-  //PImage img2 = thresholdHSB(img, 67, 138, 86, 255,0, 255);
-  PImage img2 = thresholdHSB(img, 67, 138, 86, 255,35, 200);  
-  //image(img2, img2.width,0);
+  PImage img2 = thresholdHSB(img, 67, 138, 86, 255,35, 200); 
   img2 = thresholdBinary(img2, 10,false);
-  
   img2 = convolute(img2, blur);
-  //image(img2, img2.width,0);
   img2 = blob.findConnectedComponents(img2, true);
   
-  img2 = convolute(img2, blur);
-  img2 = scharr(img2);
-  //img2 = thresholdBinary(img2, 50,false);
+  PImage img3 = convolute(img2, blur);
+  img3 = scharr(img3);
 
-  List<PVector> edges = hough.hough(img2, 4);
-  for(PVector p : edges)println(p);
-  hough.drawLines(edges,img2);
+  List<PVector> edges = hough.hough(img3, 4);
+  hough.drawLines(edges,img3);
   
-  List<PVector> vertices = qg.findBestQuad(edges,img2.width,img2.height,img2.width*img2.height,100,true);
+  List<PVector> vertices = qg.findBestQuad(edges,img3.width,img3.height,img3.width*img3.height,100,true);
   
   for (PVector pv : vertices) {
      ellipse(pv.x, pv.y, 20, 20); 
   }
-  image(img2, img2.width, 0);
-
   
+  image(img2, img2.width, 0);
+  image(img3, 0 , img3.height);
 }
 
 PImage thresholdBinary(PImage img, int threshold, boolean inverted) {
@@ -166,13 +108,8 @@ PImage convolute(PImage img, float[][] kernel) {
   // - set result.pixels[y * img.width + x] to this value
   for (int x = 0; x < w; ++x) {
     for (int y = 0; y < h; ++y) {
-
-      //For color blur, use these 3 valo
-      /*double sumPixelsRed = 0;
-       double sumPixelsGreen = 0;
-       double sumPixelsBlue = 0;*/
+      
       double sumBrightness = 0;
-
       for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
           float kernelVal = kernel[i][j];

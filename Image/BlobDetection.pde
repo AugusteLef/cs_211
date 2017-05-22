@@ -7,15 +7,14 @@ import java.util.Random;
 import java.util.HashSet;
 import java.util.Arrays;
 
-
 class BlobDetection {
-
 
   int getLabel(int x, int y, int w, int h, int[] labels) {
     if (x < 0 || y < 0 || x >= w || y >= h) return Integer.MAX_VALUE;
     else if (labels[y*w + x] == 0) return Integer.MAX_VALUE;
     else return labels[y*w + x];
   }
+  
   List<Integer> getNeighbours(int x, int y, int w, int h, int[] labels) {
     List<Integer> list = new ArrayList<Integer>();
     list.add(getLabel(x-1, y-1, w, h, labels));
@@ -31,9 +30,6 @@ class BlobDetection {
     int [] labels = new int [input.width*input.height];
     Map<Integer, Set<Integer>> labelsEquivalence = new HashMap<Integer, Set<Integer>>();
 
-
-
-    //List<Set<Integer>> labelsEquivalences = new ArrayList<Set<Integer>>();
     int currentLabel=1;
 
     input.loadPixels();
@@ -71,10 +67,6 @@ class BlobDetection {
       }
     }
 
-
-
-
-
     // Second pass: re-label the pixels by their equivalent class
     // if onlyBiggest==true, count the number of pixels for each label
     // TODO!
@@ -93,8 +85,7 @@ class BlobDetection {
         }
       }
     }
-
-
+    
     temp = 0;
     int total;
     int currentElem;
@@ -111,14 +102,11 @@ class BlobDetection {
       temp += w;
     }
 
-
-
-
     // Finally,
     // if onlyBiggest==false, output an image with each blob colored in one uniform color
     // if onlyBiggest==true, output an image with the biggest blob colored in white and the others in black
     // TODO!
-    PImage result = createImage(w, h, ALPHA);
+    PImage result = createImage(w, h,RGB);
     result.loadPixels();
     Map<Integer, Integer> toColorize = new HashMap<Integer, Integer>();
     //List<Integer> l = Arrays.asList(labelCount);
@@ -127,8 +115,6 @@ class BlobDetection {
     if (onlyBiggest)
       for (int i = 0; i < labelCount.length; ++i) 
         if (labelCount[i] > maxCount) maxCount = labelCount[i]; 
-
-
 
     Random random = new Random();
     //colorblack :
@@ -151,13 +137,8 @@ class BlobDetection {
       }
       temp += w;
     }
-
-
-
-
+    
     result.updatePixels();
-
-
     return result;
   }
 }

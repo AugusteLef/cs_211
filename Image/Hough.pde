@@ -45,15 +45,10 @@ class Hough {
            float r = x*cos(phi) + y*sin(phi) ;
            accumulator[(int)(phi/discretizationStepsPhi * rDim + r/discretizationStepsR + rDim/2)] ++;
            }
-          /*for (int indexTrig = 0; indexTrig < tabSin.length; ++indexTrig) {
-            float r = x*tabCos[indexTrig] + y*tabSin[indexTrig] ;
-            accumulator[(int)(indexTrig * rDim + r/discretizationStepsR + rDim/2)]++;
-          }*/
+          
         }
       }
     }
-
-    ArrayList<PVector> lines=new ArrayList<PVector>();
     for (int idx = 0; idx < accumulator.length; ++idx) {
       if (accumulator[idx] > minVotes) {
         int x = idx % rDim;
@@ -126,34 +121,28 @@ class Hough {
       if (y0 > 0) {
         if (x1 > 0){
           line(x0, y0, x1, y1);
-          println("x1,y1 "+x0 + " "+y0+" x2,y2 "+x1+" "+y1);
         }
         else if (y2 > 0){
           line(x0, y0, x2, y2);
-          println("x1,y1 "+x0 + " "+y0+" x2,y2 "+x2+" "+y2);
         }
         else{
           line(x0, y0, x3, y3);
-          println("x1,y1 "+x0 + " "+y0+" x2,y2 "+x3+" "+y3);
         }
       } else {
         if (x1 > 0) {
           if (y2 > 0){
             line(x1, y1, x2, y2);
-            println("x1,y1 "+x1 + " "+y1+" x2,y2 "+x2+" "+y2);
           }
           else{
             line(x1, y1, x3, y3);
-            println("x1,y1 "+x1 + " "+y1+" x2,y2 "+x3+" "+y3);
           }
         } else{
           line(x2, y2, x3, y3);
-          println("x1,y1 "+x2 + " "+y2+" x2,y2 "+x3+" "+y3);
         }
       }
     }
-
   }
+  
   class HoughComparator implements java.util.Comparator<Integer> {
     int[] accumulator;
     public HoughComparator(int[] accumulator) {
