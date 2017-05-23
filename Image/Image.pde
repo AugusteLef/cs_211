@@ -1,8 +1,13 @@
+import gab.opencv.*;
+OpenCV opencv;
+
+
 PImage img;
 Random rd = new Random();
 BlobDetection blob = new BlobDetection();
 Hough hough = new Hough();
 QuadGraph qg = new QuadGraph();
+TwoDThreeD tdtd;
 //import processing.video.*;
 //Capture cam;
 
@@ -10,8 +15,10 @@ void settings() {
   size(1600, 1200);
 }
 void setup() {
-  img = loadImage("board1.jpg");
+  img = loadImage("board4.jpg");
   noLoop();
+  opencv = new OpenCV(this,100,100);
+  tdtd = new TwoDThreeD(img.width, img.height, 0);
 }
 void draw() {
   background(color(0, 0, 0));
@@ -42,6 +49,18 @@ void draw() {
   
   image(img2, img2.width, 0);
   image(img3, 0 , img3.height);
+  
+  List<PVector> vertInHomogenous = new ArrayList<PVector>();
+  for (PVector pv : vertices) {
+    vertInHomogenous.add(new PVector(pv.x, pv.y, 1));
+  }
+  PVector rotation =  tdtd.get3DRotations(vertInHomogenous);
+  PVector correctRotation = new PVector(rotation.x > PI/2 ? rotation.x*180/PI - 180 : (rotation.x < -PI/2 ? rotation.x*180/PI + 180 : rotation.x*180/PI),
+                                        rotation.y > PI/2 ? rotation.y*180/PI - 180 : (rotation.y < -PI/2 ? rotation.y*180/PI + 180 : rotation.y*180/PI),
+                                        rotation.z > PI/2 ? rotation.z*180/PI - 180 : (rotation.z < -PI/2 ? rotation.z*180/PI + 180 : rotation.z*180/PI));
+  println("rx = " + correctRotation.x + " ry = " + correctRotation.y + " rz = " + correctRotation.z);
+ 
+  
 }
 
 PImage thresholdBinary(PImage img, int threshold, boolean inverted) {
