@@ -1,3 +1,7 @@
+import processing.video.*;
+import gab.opencv.*;
+Capture cam;
+
 //Objects
 Mover mover;
 Shapes shapes;
@@ -22,6 +26,10 @@ final static float TOP_VIEW_SPHERE = ((float)SPHERE/BOX_X)*TOP_VIEW_SIZE;
 final static float TOP_VIEW_CUBE_EDGE = ((float) CUBE_EDGE/BOX_X)*TOP_VIEW_SIZE;
 
 //Variables:
+PVector toMove = new PVector();
+PVector toMoveAcc = new PVector();
+PShape pacman;
+Image imgproc;                                                  
 //Default camera depth
 float depth = 3000; 
 boolean paused = false;
@@ -30,6 +38,7 @@ boolean putSquares = false;
 float rx = 0;
 float rz = 0;
 //Initalise mouse_before/after to follow mouse position and rx/rz to save angle
+int calculate = 0;
 int mouseZ_before = 0;
 int mouseZ_after = 0;
 int mouseX_before = 0;
@@ -43,7 +52,8 @@ float last_score = 0;
 long game_tick = 0;
 
 void settings() {
-  size(BOARD_SIZE, BOARD_SIZE, P3D);
+  size(BOARD_SIZE*2, BOARD_SIZE, P3D);
+  System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 }
 
 void setup() {
@@ -52,9 +62,65 @@ void setup() {
   surfaces = new Surfaces();
   scroll_bar = new HScrollbar(BOARD_SIZE / 3, (4 * BOARD_SIZE / 5) + TOP_VIEW_SIZE + 30, 2*BOARD_SIZE / 3 - 25, 15);
   noStroke();
+
+
+  String[] cameras = Capture.list();
+  if (cameras.length == 0) {
+    println("There are no cameras available for capture.");
+    exit();
+  } else {
+    println("Available cameras:");
+    for (int i = 0; i < cameras.length; i++) {
+      println(cameras[i]);
+    }
+    cam = new Capture(this, cameras[1]);
+    cam.start();
+  }
+  imgproc = new Image(cam.width, cam.height);
+
+  size(100, 100, P3D);
+  pacman = loadShape("untitled.obj");
+  pacman.scale(100);
+  pacman.rotateX(PI);
+  pacman.rotateY(-PI/2);
+
+  //asynchronus calculation with the webcam, do not slow the main game
+  /*final Thread t = new Thread(new Runnable() {
+   public void run() {
+   int i=0;
+   boolean done1 = false;
+   while (true) {
+   //println(imgproc+"");
+   long t1 = System.currentTimeMillis();
+   PVector testt = imgproc.drawImage(cam.get(), surfaces.testCamImage);
+   long t2 = System.currentTimeMillis() - t1;
+   ++i;
+   if (testt.x != 0 || done1) {
+   done1 = true;
+   println(i+" "+testt.x + " "+ testt.z+ " "+t2);
+   }
+   }
+   }
+   }
+   );
+   t.start();*/
 }
 
 void draw() {
+  if (cam.available() == true) {
+    cam.read();
+  }
+
+  if (++calculate == 10) {
+    calculate = 0;
+    new Thread(new Runnable() {
+      public void run() {
+        PVector testt = imgproc.drawImage(cam.get(), surfaces.testCamImage);
+      }
+    }
+    ).start();
+  }
+
   drawGame();
   drawSurfaces();
   scroll_bar.update();
@@ -65,6 +131,7 @@ void drawSurfaces() {
   camera();
   noLights();
   //Create every surface
+
   surfaces.drawAllSurfaces();
   //Print every surface
   surfaces.showAllSurfaces();
@@ -72,27 +139,28 @@ void drawSurfaces() {
 
 void drawGame() {
   pushMatrix();
-  
+
   //New lights
   directionalLight(50, 100, 125, 1, 1, 0);
   ambientLight(102, 102, 102);
-  
+
   //Position camera in the center of the screen
   camera(width/2, height/2, depth, width/2, height/2, 0, 0, 1, 0);
-  
+
   //White background
   background(255);
-  
+
   //Set correct position for the box
   translate(width/2, height/2, 0);
   if (paused) {
     rotateX(-PI/2);
-  } 
-  else {
+  } else {
     rotateZ(rz);
-    rotateX(rx);
+    rotateX(-PI/4 + rx);
+    //rotateZ(toMove.z);
+    //rotateX(-PI/4 + toMove.x);
   }
-  
+
   //Draw the board
   color c = color(0, 172, 190);
   fill(c);
@@ -122,7 +190,7 @@ void mouseDragged()
     //Z AXIS :
     //Save new mouse position
     mouseZ_after = mouseX;
-    
+
     //Increase the angle by the differnce between mouse positions
     rz += (mouseZ_after - mouseZ_before) * PI/speed;
 
@@ -136,7 +204,7 @@ void mouseDragged()
     //X AXIS : 
     //Save new mouse position
     mouseX_after = mouseY;
-    
+
     //Increase the angle by the differnce between mouse positions
     rx = rx + (mouseX_before - mouseX_after) * PI/speed;
 
@@ -156,7 +224,7 @@ void keyPressed() {
     //Pause the game when SHIFT pressed
     else if (keyCode == SHIFT) paused = true;
   }
-  
+
   //When the game is paused and we press q we can put Cubes on the board
   if ((key == 'Q' || key == 'q') && paused) putSquares = true;
 }
@@ -180,13 +248,13 @@ void mouseWheel(MouseEvent event) {
 
   //Wheel going down => increase speed
   if (wheelCount < 0) {
-    for (int i = 0; i < -wheelCount; ++i){
+    for (int i = 0; i < -wheelCount; ++i) {
       speed *= 1.02;
     }
   }
-  
+
   //Wheel going up => deacrease speed
-  else if (wheelCount > 0){
+  else if (wheelCount > 0) {
     for (int i = 0; i < wheelCount; ++i) {
       speed /= 1.02;
     }
@@ -199,7 +267,7 @@ void mouseClicked() {
     //Mouse positions
     int x = mouseX;
     int y = mouseY;
-    
+
     //Positions according to the board    
     x = (int)((x-width/2) * (depth-BOX_Y/2)/width*1.15);
     y = (int)((y-height/2) * (depth-BOX_Y/2)/height*1.15);
@@ -211,17 +279,17 @@ void mouseClicked() {
       shapes.cylinders.add(new PVector(x, 0, y));
     }
   }
-  
+
   //Otherwise if we're able to put cubes:  
   else if (putSquares) {
     //Mouse positions
     int x = mouseX;
     int y = mouseY;
-    
+
     //Positions according to the board
     x = (int)((x * (depth-BOX_Y/2)/width*1.15)-CUBE_EDGE/4)/CUBE_EDGE*CUBE_EDGE + CUBE_EDGE/2 - (int)(width/2 * (depth-BOX_Y/2)/width*1.15)/CUBE_EDGE*CUBE_EDGE;
     y = (int)((y * (depth-BOX_Y/2)/height*1.15)-CUBE_EDGE/4)/CUBE_EDGE*CUBE_EDGE + CUBE_EDGE/2 - (int)(height/2 * (depth-BOX_Y/2)/height*1.15)/CUBE_EDGE*CUBE_EDGE;
-    
+
     //If those positions are bounded, it adds the cube to the square array in the shapes object
     if (!shapes.squares.contains(new PVector(x, -BOX_Y/2, y)) && x < BOX_X/2 && y < BOX_Z/2 && x > -BOX_X/2 && y > -BOX_Z/2)
       shapes.squares.add(new PVector(x, -BOX_Y/2, y));

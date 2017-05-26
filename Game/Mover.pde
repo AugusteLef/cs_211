@@ -10,7 +10,7 @@ class Mover {
   float rebond = 1;
   float gravityConstant = 1;
   float normalForce = 1;
-  float mu = 0.01;
+  float mu = 0.10;
   float frictionMagnitude = normalForce * mu;
 
   //Initialisation
@@ -25,17 +25,20 @@ class Mover {
     //Update the gravity according to the angle of the board
     gravity.x = sin(rz) * gravityConstant;
     gravity.z = - sin(rx) * gravityConstant;
+    //println(""+toMove.z);
+    //gravity.x = sin(toMove.z) * gravityConstant;
+    //gravity.z = -sin(toMove.x) * gravityConstant;
     
     //Update friction
     friction = velocity.get().mult(-1).normalize().mult(frictionMagnitude);
-    
+
     //Update velocity
     velocity.add(gravity);
     velocity.add(friction);
-    
+
     //Update location
     location.add(velocity);
-    
+
     //Check if the ball has gone further than the boundaries (board, cylinders, cubes)
     checkEdges();
   }
@@ -44,7 +47,12 @@ class Mover {
     translate(location.x, location.y, location.z);
     color c = color(255, 0, 10);
     fill(c);
-    sphere(SPHERE);
+    //sphere(SPHERE);
+    pushMatrix();
+    float angle = (float)Math.atan2(velocity.x, velocity.z);
+    rotateY(angle);
+    shape(pacman, 0, 0);
+    popMatrix();
   }
 
   void checkEdges() {
@@ -73,7 +81,7 @@ class Mover {
       last_score = -velocity.mag();
       tot_score += last_score;
     }
-    
+
     //Deals bouncings for each cylinder using 2D PVector for angle symetry of the new direction of the velocity. 
     //If the ball comes to touch or to go inside a cylinder, replace it at the edge of the cylinder
     for (PVector pos : shapes.cylinders) {
@@ -92,7 +100,7 @@ class Mover {
         location = new PVector(Math.signum(normal.x)*(float)Math.sqrt(normal.x*normal.x*coefXY) + pos.x, location.y, Math.signum(normal.z)*(float)Math.sqrt(normal.z*normal.z*coefXY) + pos.z);
       }
     }
-    
+
     //Bonus cubes, the edges act like the edge of board and the corner use angle symetry with 2D PVectors.
     //If 2 cubes are one next to another, disenable the boucing of the corners to avoid bugs.
     //Replace the ball at the edge of the cube or at the corner of it.
@@ -119,7 +127,7 @@ class Mover {
           location.z = pos.z + CUBE_EDGE/2 + SPHERE;
         velocity.z *= -rebond;
       } 
-      
+
       //Deals with the corner of the cubes and check if there's a cube next to it, if so disenable the corner
       else if (Math.pow(location.x - topLeft.x, 2) + Math.pow(location.z - topLeft.y, 2) <= SPHERE*SPHERE -1 && !shapes.squares.contains(new PVector(pos.x-CUBE_EDGE, pos.y, pos.z)) && !shapes.squares.contains(new PVector(pos.x, pos.y, pos.z+CUBE_EDGE))) {
         squareCorner(topLeft);
