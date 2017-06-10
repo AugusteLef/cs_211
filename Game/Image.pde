@@ -1,83 +1,9 @@
+import gab.opencv.*;
+
 class Image {
-  //OpenCV opencv;
-  PVector lastCorner = new PVector(0, 0, 0);
-  Random rd = new Random();
-  BlobDetection blob = new BlobDetection();
-  Hough hough = new Hough();
-  QuadGraph qg = new QuadGraph();
-  TwoDThreeD tdtd;
-
-  public Image(int w, int h) {
-    //opencv = new OpenCV(this, 100, 100);
-    tdtd = new TwoDThreeD(w, h, 0);
-  }
 
 
-  /*img.widthoid settings() {
-   size(1600, 1200);
-   }
-   void setup() {
-   img = loadImage("board4.jpg");
-   noLoop();
-   opencv = new OpenCV(this,100,100);
-   tdtd = new TwoDThreeD(img.width, img.height, 0);
-   }*/
-  PVector drawImage(PImage img, PGraphics toDraw1) {
-    
 
-    float[][] blur = {
-      {9, 12, 9}, 
-      {12, 15, 12}, 
-      {9, 12, 9}
-    };
-
-    PImage img2 = thresholdHSB(img, 67, 138, 86, 255, 35, 200); 
-    img2 = thresholdBinary(img2, 10, false);
-    img2 = convolute(img2, blur);
-    img2 = blob.findConnectedComponents(img2, true);
-
-    PImage img3 = convolute(img2, blur);
-    img3 = scharr(img3);
-
-    List<PVector> edges = hough.hough(img3, 4);
-    //hough.drawLines(edges, img3);
-
-    List<PVector> vertices = qg.findBestQuad(edges, img3.width, img3.height, img3.width*img3.height, 100, true);
-
-    //TODO REMOVE (?)
-    /*if (img.width == toDraw1.width) {
-      toDraw1.beginDraw();
-      toDraw1.background(img);
-      toDraw1.endDraw();
-    }
-    
-    toDraw1.beginDraw();
-    for (PVector pv : vertices) {
-      toDraw1.ellipse(pv.x, pv.y, 20, 20);
-    }
-    toDraw1.endDraw();
-    */
-    
-    
-    if (vertices.size() < 4) return lastCorner;
-
-    //toDraw1.image(img2, img2.width, 0);
-    //image(img3, 0, img3.height);
-
-    List<PVector> vertInHomogenous = new ArrayList<PVector>();
-    for (PVector pv : vertices) {
-      vertInHomogenous.add(new PVector(pv.x, pv.y, 1));
-    }
-    PVector rotation =  tdtd.get3DRotations(vertInHomogenous);
-    PVector correctRotation = new PVector(rotation.x > PI/2 ? rotation.x -PI : (rotation.x < -PI/2 ? rotation.x + PI : rotation.x), 
-      rotation.y > PI/2 ? rotation.y - PI : (rotation.y < -PI/2 ? rotation.y + PI : rotation.y), 
-      rotation.z > PI/2 ? rotation.z - PI : (rotation.z < -PI/2 ? rotation.z + PI : rotation.z));
-    println("rx = " + correctRotation.x + " ry = " + correctRotation.y + " rz = " + correctRotation.z);
-
-    toMove.x = correctRotation.x;
-    toMove.z = correctRotation.z;
-    return correctRotation;
-  }
 
   PImage thresholdBinary(PImage img, int threshold, boolean inverted) {
     // create a new, initially transparent, 'result' image
@@ -230,7 +156,7 @@ class Image {
       { -3, -10, -3 } };
     int h = img.height;
     int w = img.width;
-    PImage result = createImage(w, h, ALPHA);
+    PImage result = createImage(w, h, RGB);//put ALPHA here to have transparent background
     // clear the image
     for (int i = 0; i < w * h; i++) {
       result.pixels[i] = color(0);
@@ -253,8 +179,8 @@ class Image {
 
     for (int y = 2; y < h - 2; ++y) { // Skip top and bottom edges
       for (int x = 2; x < w - 2; ++x) { // Skip left and right
-        int val=(int) ((buffer[y * w + x] / max)*255);
-        result.pixels[y * w + x]=color(val);
+        int val = (int) ((buffer[y * w + x] / max) * 255);
+        result.pixels[y * w + x] = color(val);
       }
     }
     return result;

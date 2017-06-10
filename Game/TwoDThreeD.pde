@@ -123,7 +123,7 @@ class TwoDThreeD {
       // corner p found in the webcam image.
       // You can use PVector dot function for computing dot product between K^(-1) lines and p.
       //Do not forget to normalize the result
-      PVector point =points2D.get(i);
+      PVector point = points2D.get(i);
       projectedCorners[i][0]=point.dot(invK_r1)/point.dot(invK_r3);
       projectedCorners[i][1]=point.dot(invK_r2)/point.dot(invK_r3);
       projectedCorners[i][2]=1;

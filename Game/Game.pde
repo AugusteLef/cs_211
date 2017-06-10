@@ -1,7 +1,3 @@
-import processing.video.*;
-import gab.opencv.*;
-Capture cam;
-
 //Objects
 Mover mover;
 Shapes shapes;
@@ -26,10 +22,6 @@ final static float TOP_VIEW_SPHERE = ((float)SPHERE/BOX_X)*TOP_VIEW_SIZE;
 final static float TOP_VIEW_CUBE_EDGE = ((float) CUBE_EDGE/BOX_X)*TOP_VIEW_SIZE;
 
 //Variables:
-PVector toMove = new PVector();
-PVector toMoveAcc = new PVector();
-PShape pacman;
-Image imgproc;                                                  
 //Default camera depth
 float depth = 3000; 
 boolean paused = false;
@@ -38,7 +30,6 @@ boolean putSquares = false;
 float rx = 0;
 float rz = 0;
 //Initalise mouse_before/after to follow mouse position and rx/rz to save angle
-int calculate = 0;
 int mouseZ_before = 0;
 int mouseZ_after = 0;
 int mouseX_before = 0;
@@ -51,76 +42,32 @@ float last_score = 0;
 //Time
 long game_tick = 0;
 
+PImage img;
+
+PGraphics gameGraphic;
+
+ImageProcessing imgproc;
 void settings() {
-  size(BOARD_SIZE*2, BOARD_SIZE, P3D);
+  size(BOARD_SIZE, BOARD_SIZE, P3D);
   System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 }
 
 void setup() {
+  gameGraphic = createGraphics(BOARD_SIZE, BOARD_SIZE, P3D);
+  gameGraphic.noStroke();
   mover = new Mover();
   shapes = new Shapes();
   surfaces = new Surfaces();
   scroll_bar = new HScrollbar(BOARD_SIZE / 3, (4 * BOARD_SIZE / 5) + TOP_VIEW_SIZE + 30, 2*BOARD_SIZE / 3 - 25, 15);
   noStroke();
 
+  imgproc = new ImageProcessing();
+  String []args = {"Image processing window"};
 
-  String[] cameras = Capture.list();
-  if (cameras.length == 0) {
-    println("There are no cameras available for capture.");
-    exit();
-  } else {
-    println("Available cameras:");
-    for (int i = 0; i < cameras.length; i++) {
-      println(cameras[i]);
-    }
-    cam = new Capture(this, cameras[1]);
-    cam.start();
-  }
-  imgproc = new Image(cam.width, cam.height);
-
-  size(100, 100, P3D);
-  pacman = loadShape("untitled.obj");
-  pacman.scale(100);
-  pacman.rotateX(PI);
-  pacman.rotateY(-PI/2);
-
-  //asynchronus calculation with the webcam, do not slow the main game
-  /*final Thread t = new Thread(new Runnable() {
-   public void run() {
-   int i=0;
-   boolean done1 = false;
-   while (true) {
-   //println(imgproc+"");
-   long t1 = System.currentTimeMillis();
-   PVector testt = imgproc.drawImage(cam.get(), surfaces.testCamImage);
-   long t2 = System.currentTimeMillis() - t1;
-   ++i;
-   if (testt.x != 0 || done1) {
-   done1 = true;
-   println(i+" "+testt.x + " "+ testt.z+ " "+t2);
-   }
-   }
-   }
-   }
-   );
-   t.start();*/
+  PApplet.runSketch(args, imgproc);
 }
 
 void draw() {
-  if (cam.available() == true) {
-    cam.read();
-  }
-
-  if (++calculate == 10) {
-    calculate = 0;
-    new Thread(new Runnable() {
-      public void run() {
-        PVector testt = imgproc.drawImage(cam.get(), surfaces.testCamImage);
-      }
-    }
-    ).start();
-  }
-
   drawGame();
   drawSurfaces();
   scroll_bar.update();
@@ -131,40 +78,43 @@ void drawSurfaces() {
   camera();
   noLights();
   //Create every surface
-
   surfaces.drawAllSurfaces();
   //Print every surface
   surfaces.showAllSurfaces();
 }
 
 void drawGame() {
-  pushMatrix();
+  gameGraphic.beginDraw();
+  gameGraphic.pushMatrix();
 
   //New lights
-  directionalLight(50, 100, 125, 1, 1, 0);
-  ambientLight(102, 102, 102);
+  gameGraphic.directionalLight(50, 100, 125, 1, 1, 0);
+  gameGraphic.ambientLight(102, 102, 102);
 
   //Position camera in the center of the screen
-  camera(width/2, height/2, depth, width/2, height/2, 0, 0, 1, 0);
+  gameGraphic.camera(width/2, height/2, depth, width/2, height/2, 0, 0, 1, 0);
 
   //White background
-  background(255);
+  gameGraphic.background(255);
+
+
+  PVector rot = imgproc.getRotation();
+  rx = rot.x;
+  rz = rot.z;
 
   //Set correct position for the box
-  translate(width/2, height/2, 0);
+  gameGraphic.translate(width/2, height/2, 0);
   if (paused) {
-    rotateX(-PI/2);
+    gameGraphic.rotateX(-PI/2);
   } else {
-    rotateZ(rz);
-    rotateX(-PI/4 + rx);
-    //rotateZ(toMove.z);
-    //rotateX(-PI/4 + toMove.x);
+    gameGraphic.rotateZ(rz);
+    gameGraphic.rotateX(rx);
   }
 
   //Draw the board
   color c = color(0, 172, 190);
-  fill(c);
-  box(BOX_X, BOX_Y, BOX_Z);
+  gameGraphic.fill(c);
+  gameGraphic.box(BOX_X, BOX_Y, BOX_Z);
 
   //Draw the shapes
   shapes.drawShapes();
@@ -175,7 +125,9 @@ void drawGame() {
 
   //Display the ball
   mover.display();
-  popMatrix();
+  gameGraphic.popMatrix();
+  gameGraphic.endDraw();
+  image(gameGraphic, 0, 0);
 }
 
 void mouseMoved() {
@@ -184,7 +136,7 @@ void mouseMoved() {
   mouseX_before = mouseY;
 }
 
-void mouseDragged() 
+/*void mouseDragged() 
 {
   if (!paused) {
     //Z AXIS :
@@ -215,7 +167,7 @@ void mouseDragged()
     //Save new mouse position
     mouseX_before = mouseX_after;
   }
-}
+}*/
 void keyPressed() {
   //Changed depth of the camera when key pressed
   if (key == CODED) {

@@ -10,7 +10,7 @@ class Mover {
   float rebond = 1;
   float gravityConstant = 1;
   float normalForce = 1;
-  float mu = 0.10;
+  float mu = 0.01;
   float frictionMagnitude = normalForce * mu;
 
   //Initialisation
@@ -25,10 +25,7 @@ class Mover {
     //Update the gravity according to the angle of the board
     gravity.x = sin(rz) * gravityConstant;
     gravity.z = - sin(rx) * gravityConstant;
-    //println(""+toMove.z);
-    //gravity.x = sin(toMove.z) * gravityConstant;
-    //gravity.z = -sin(toMove.x) * gravityConstant;
-    
+
     //Update friction
     friction = velocity.get().mult(-1).normalize().mult(frictionMagnitude);
 
@@ -44,15 +41,10 @@ class Mover {
   }
 
   void display() {
-    translate(location.x, location.y, location.z);
+    gameGraphic.translate(location.x, location.y, location.z);
     color c = color(255, 0, 10);
-    fill(c);
-    //sphere(SPHERE);
-    pushMatrix();
-    float angle = (float)Math.atan2(velocity.x, velocity.z);
-    rotateY(angle);
-    shape(pacman, 0, 0);
-    popMatrix();
+    gameGraphic.fill(c);
+    gameGraphic.sphere(SPHERE);
   }
 
   void checkEdges() {

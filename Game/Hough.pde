@@ -99,7 +99,7 @@ class Hough {
     }
     return bestLines;
   }
-  void drawLines(List<PVector> lines, PImage img) {
+  void drawLines(List<PVector> lines, PImage img, PGraphics pgraphics) {
     for (PVector line : lines) {
      
       float r = line.x;
@@ -124,28 +124,28 @@ class Hough {
       int y3 = img.width;
       int x3 = (int) (-(y3 - rSinPhi) * (sinPhi / cosPhi));
       // Finally, plot the lines
-     strokeWeight(5);
+      strokeWeight(5);
       stroke(204, 102, 0);
       if (y0 > 0) {
         if (x1 > 0){
-          line(x0, y0, x1, y1);
+          pgraphics.line(x0, y0, x1, y1);
         }
         else if (y2 > 0){
-          line(x0, y0, x2, y2);
+          pgraphics.line(x0, y0, x2, y2);
         }
         else{
-          line(x0, y0, x3, y3);
+          pgraphics.line(x0, y0, x3, y3);
         }
       } else {
         if (x1 > 0) {
           if (y2 > 0){
-            line(x1, y1, x2, y2);
+            pgraphics.line(x1, y1, x2, y2);
           }
           else{
-            line(x1, y1, x3, y3);
+            pgraphics.line(x1, y1, x3, y3);
           }
         } else{
-          line(x2, y2, x3, y3);
+          pgraphics.line(x2, y2, x3, y3);
         }
       }
     }

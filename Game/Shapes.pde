@@ -96,16 +96,16 @@ class Shapes {
   //Draw both cylinders and cubes
   void drawShapes() {
     for (PVector p : cylinders) {
-      translate(p.x, p.y, p.z);
-      shape(openCylinder);
-      shape(coverTop);
-      translate(-p.x, -p.y, -p.z);
+      gameGraphic.translate(p.x, p.y, p.z);
+       gameGraphic.shape(openCylinder);
+       gameGraphic.shape(coverTop);
+       gameGraphic.translate(-p.x, -p.y, -p.z);
     }
     for (PVector p : squares) {
-      translate(p.x, p.y, p.z);
-      shape(openCube);
-      shape(topCube);
-      translate(-p.x, -p.y, -p.z);
+       gameGraphic.translate(p.x, p.y, p.z);
+       gameGraphic.shape(openCube);
+       gameGraphic.shape(topCube);
+      gameGraphic. translate(-p.x, -p.y, -p.z);
     }
   }
 }

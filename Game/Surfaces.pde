@@ -6,7 +6,6 @@ class Surfaces {
   PGraphics topView;
   PGraphics scoreboard;
   PGraphics barChart;
-  PGraphics testCamImage;
   
   //Default Size of a "box" from the graph
   int graph_box_x = 10;
@@ -25,7 +24,6 @@ class Surfaces {
     topView = createGraphics(TOP_VIEW_SIZE, TOP_VIEW_SIZE, P2D);
     scoreboard = createGraphics(TOP_VIEW_SIZE, TOP_VIEW_SIZE, P2D);
     barChart = createGraphics(2*BOARD_SIZE / 3 - 25, TOP_VIEW_SIZE, P2D);
-    testCamImage = createGraphics(640, 360, P2D);
   }
   void drawAllSurfaces() {
     // Draw every Surface
