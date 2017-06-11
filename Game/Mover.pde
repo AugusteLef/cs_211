@@ -42,9 +42,12 @@ class Mover {
 
   void display() {
     gameGraphic.translate(location.x, location.y, location.z);
-    color c = color(255, 0, 10);
-    gameGraphic.fill(c);
-    gameGraphic.sphere(SPHERE);
+    //sphere(SPHERE);
+    gameGraphic.pushMatrix();
+    float angle = (float)Math.atan2(velocity.x, velocity.z);
+    gameGraphic.rotateY(angle);
+    gameGraphic.shape(pacman, 0, 0);
+    gameGraphic.popMatrix();
   }
 
   void checkEdges() {

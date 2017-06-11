@@ -9,6 +9,8 @@ class HScrollbar {
   
   boolean mouseOver;  //Is the mouse over the slider?
   boolean locked;     //Is the mouse clicking and dragging the slider now?
+  
+  PGraphics barGraphic;
 
   /**
    * @brief Creates a new horizontal scrollbar
@@ -24,11 +26,13 @@ class HScrollbar {
     xPosition = x;
     yPosition = y;
     
-    sliderPosition = xPosition + barWidth/2 - barHeight/2;
+    sliderPosition = barWidth/2 - barHeight/2;
     newSliderPosition = sliderPosition;
     
-    sliderPositionMin = xPosition;
-    sliderPositionMax = xPosition + barWidth - barHeight;
+    sliderPositionMin = 0;
+    sliderPositionMax = barWidth - barHeight;
+    
+    barGraphic = createGraphics((int)w, (int)h, P2D);
   }
 
   /**
@@ -48,7 +52,7 @@ class HScrollbar {
       locked = false;
     }
     if (locked) {
-      newSliderPosition = constrain(mouseX - barHeight/2, sliderPositionMin, sliderPositionMax);
+      newSliderPosition = constrain(mouseX -xPosition - barHeight/2, sliderPositionMin, sliderPositionMax);
     }
     if (abs(newSliderPosition - sliderPosition) > 1) {
       sliderPosition = sliderPosition + (newSliderPosition - sliderPosition);
@@ -87,16 +91,20 @@ class HScrollbar {
    * @brief Draws the scrollbar in its current state
    */ 
   void display() {
-    noStroke();
-    fill(204);
-    rect(xPosition, yPosition, barWidth, barHeight);
+    
+    barGraphic.beginDraw();
+    barGraphic.noStroke();
+    barGraphic.fill(204);
+    barGraphic.rect(0, 0, barWidth, barHeight);
     if (mouseOver || locked) {
-      fill(0, 0, 0);
+      barGraphic.fill(0, 0, 0);
     }
     else {
-      fill(102, 102, 102);
+      barGraphic.fill(102, 102, 102);
     }
-    rect(sliderPosition, yPosition, barHeight, barHeight);
+    barGraphic.rect(sliderPosition, 0, barHeight, barHeight);
+    barGraphic.endDraw();
+    image(barGraphic, xPosition, yPosition);
   }
 
   /**
@@ -105,6 +113,6 @@ class HScrollbar {
    * @return The slider position in the interval [0,1] corresponding to [leftmost position, rightmost position]
    */
   float getPos() {
-    return (sliderPosition - xPosition)/(barWidth - barHeight);
+    return (sliderPosition)/(barWidth - barHeight);
   }
 }

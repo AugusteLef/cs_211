@@ -22,6 +22,8 @@ final static float TOP_VIEW_SPHERE = ((float)SPHERE/BOX_X)*TOP_VIEW_SIZE;
 final static float TOP_VIEW_CUBE_EDGE = ((float) CUBE_EDGE/BOX_X)*TOP_VIEW_SIZE;
 
 //Variables:
+PShape pacman;
+PShape tower;
 //Default camera depth
 float depth = 3000; 
 boolean paused = false;
@@ -65,6 +67,18 @@ void setup() {
   String []args = {"Image processing window"};
 
   PApplet.runSketch(args, imgproc);
+  
+  size(100, 100, P3D);
+  pacman = loadShape("untitled.obj");//couldn't change the name or color didn't show anymore...
+  pacman.scale(100);
+  pacman.rotateX(PI);
+  pacman.rotateY(-PI/2);
+  
+  //size(100, 250, P3D);
+  tower = loadShape("projetTower.obj");
+  tower.scale(10);
+  tower.rotateX(PI);
+  tower.rotateY(-PI/2);
 }
 
 void draw() {
@@ -99,7 +113,7 @@ void drawGame() {
 
 
   PVector rot = imgproc.getRotation();
-  rx = rot.x;
+  rx = -rot.x;
   rz = rot.z;
 
   //Set correct position for the box
@@ -108,12 +122,13 @@ void drawGame() {
     gameGraphic.rotateX(-PI/2);
   } else {
     gameGraphic.rotateZ(rz);
-    gameGraphic.rotateX(rx);
+    gameGraphic.rotateX(rx -PI/2);
   }
 
   //Draw the board
   color c = color(0, 172, 190);
   gameGraphic.fill(c);
+  gameGraphic.noStroke();
   gameGraphic.box(BOX_X, BOX_Y, BOX_Z);
 
   //Draw the shapes

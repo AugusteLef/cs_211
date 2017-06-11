@@ -96,9 +96,10 @@ class Shapes {
   //Draw both cylinders and cubes
   void drawShapes() {
     for (PVector p : cylinders) {
-      gameGraphic.translate(p.x, p.y, p.z);
-       gameGraphic.shape(openCylinder);
-       gameGraphic.shape(coverTop);
+       gameGraphic.translate(p.x, p.y, p.z);
+       //gameGraphic.shape(openCylinder);
+       //gameGraphic.shape(coverTop); => to draw cylinders
+       gameGraphic.shape(tower, 0, 0);
        gameGraphic.translate(-p.x, -p.y, -p.z);
     }
     for (PVector p : squares) {
