@@ -20,7 +20,7 @@ class ImageProcessing extends PApplet {
   
 
   void settings() {
-    size(1600, 1200, P2D);
+    size(800, 600, P2D);
   }
   void setup() {
     System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -39,7 +39,7 @@ class ImageProcessing extends PApplet {
       cam = new Capture(this, cameras[3]);
       cam.start();
     }*/
-    pgraphic = createGraphics(1600, 1200, P2D);
+    pgraphic = createGraphics(800, 600, P2D);
   }
   void draw() {
     if (cam.available() == true) {
@@ -77,8 +77,8 @@ class ImageProcessing extends PApplet {
       pgraphic.ellipse(pv.x, pv.y, 20, 20);
     }
 
-    pgraphic.image(img2, img2.width, 0);
-    pgraphic.image(img3, 0, img3.height);
+    //pgraphic.image(img2, img2.width, 0);
+    //pgraphic.image(img3, 0, img3.height);
     pgraphic.endDraw();
     image(pgraphic, 0, 0);
 

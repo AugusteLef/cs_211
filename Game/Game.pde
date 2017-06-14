@@ -1,3 +1,6 @@
+//to activate mouse control, press 'ALT' once, to reactivate video control, press 'ALT' again.
+//to add cylinders (towers) press SHIFT. To add cubes press SHIFT + Q (little thing of our own)
+
 //Objects
 Mover mover;
 Shapes shapes;
@@ -22,6 +25,7 @@ final static float TOP_VIEW_SPHERE = ((float)SPHERE/BOX_X)*TOP_VIEW_SIZE;
 final static float TOP_VIEW_CUBE_EDGE = ((float) CUBE_EDGE/BOX_X)*TOP_VIEW_SIZE;
 
 //Variables:
+boolean isCam = true;
 PShape pacman;
 PShape tower;
 //Default camera depth
@@ -67,13 +71,13 @@ void setup() {
   String []args = {"Image processing window"};
 
   PApplet.runSketch(args, imgproc);
-  
+
   size(100, 100, P3D);
   pacman = loadShape("untitled.obj");//couldn't change the name or color didn't show anymore...
   pacman.scale(100);
   pacman.rotateX(PI);
   pacman.rotateY(-PI/2);
-  
+
   //size(100, 250, P3D);
   tower = loadShape("projetTower.obj");
   tower.scale(10);
@@ -112,9 +116,11 @@ void drawGame() {
   gameGraphic.background(255);
 
 
-  PVector rot = imgproc.getRotation();
-  rx = -rot.x;
-  rz = rot.z;
+  if (isCam) {
+    PVector rot = imgproc.getRotation();
+    rx = -rot.x;
+    rz = rot.z;
+  }
 
   //Set correct position for the box
   gameGraphic.translate(width/2, height/2, 0);
@@ -151,9 +157,9 @@ void mouseMoved() {
   mouseX_before = mouseY;
 }
 
-/*void mouseDragged() 
+void mouseDragged() 
 {
-  if (!paused) {
+  if (!paused && !isCam) {
     //Z AXIS :
     //Save new mouse position
     mouseZ_after = mouseX;
@@ -182,7 +188,7 @@ void mouseMoved() {
     //Save new mouse position
     mouseX_before = mouseX_after;
   }
-}*/
+}
 void keyPressed() {
   //Changed depth of the camera when key pressed
   if (key == CODED) {
@@ -190,6 +196,7 @@ void keyPressed() {
     else if (keyCode == DOWN) depth += 50;
     //Pause the game when SHIFT pressed
     else if (keyCode == SHIFT) paused = true;
+    else if (keyCode == ALT) isCam = !isCam;
   }
 
   //When the game is paused and we press q we can put Cubes on the board

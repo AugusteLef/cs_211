@@ -7,7 +7,7 @@ class Mover {
   PVector friction;
 
   //Floats
-  float rebond = 1;
+  float rebond = 0.95;
   float gravityConstant = 1;
   float normalForce = 1;
   float mu = 0.01;
